@@ -82,27 +82,17 @@ function visibleHandler(Idx, bool){
 }
 
 
-function changeRotationAndPosition(idx, scale, center_x, center_y, depth, x_rot, y_rot, z_rot){
-    
-    // var depthFactor = 0.027
-    var objectScaleFactor = (scale / 250);
-    console.log(objectScaleFactor);
-    
-    model.scale.x = 3.2 * objectScaleFactor;
-    model.scale.y = 3.2 * objectScaleFactor;
-    model.scale.z = 3.2 * objectScaleFactor;
+function changeRotationAndPosition(idx, center_x, center_y, x_rot, y_rot, z_rot){
+    // center_x = center_x - (center_x * (y_rot * 10));
 
-
-    center_x = center_x - (center_x * (y_rot * 10));
-
-    center_y = center_y + 150;
+    // center_y = center_y + 150;
     
     var pos = new THREE.Vector3(); // create once and reuse
     var vec = new THREE.Vector3(); // create once and reuse
     vec.set(
         (( center_x / camera_width ) * 2 - 1).toFixed(4),
         (- ( center_y / camera_height ) * 2 + 1).toFixed(4),
-        10- (depth * 10) ); // 0.5
+        0.5); 
 
     vec.unproject(camera);
     
@@ -113,20 +103,20 @@ function changeRotationAndPosition(idx, scale, center_x, center_y, depth, x_rot,
     var value = vec.multiplyScalar( distance.toFixed(4) );
   
     if (idx == 0) {
-        // model.position.z = -depth.toFixed(3);
+        
         model.position.x = (pos.x + value.x).toFixed(3);
         model.position.y = (pos.y + value.y).toFixed(3);
 
-        model.rotation.x = (-x_rot * 15).toFixed(2);
-        model.rotation.y = (y_rot * 30).toFixed(2);
+        model.rotation.x = (-x_rot).toFixed(2);
+        model.rotation.y = (-y_rot).toFixed(2);
         
         
     }
     else{
         secondModel.position.x = (pos.x + value.x);
         secondModel.position.y = (pos.y + value.y);
-        secondModel.rotation.x = -x_rot * 15;
-        secondModel.rotation.y = y_rot * 30;
+        // secondModel.rotation.x = -x_rot * 15;
+        // secondModel.rotation.y = y_rot * 30;
     }
     
     

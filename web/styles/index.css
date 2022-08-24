@@ -104,6 +104,20 @@ html, body {
 	
 }
 
+#send_canvas {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 99;
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+	visibility: hidden;
+	
+}
+
+
 button {
 	/* margin-right: 5rem; */
 	position: relative;

@@ -27,9 +27,10 @@ def main(args, color=(224, 255, 255)):
         # width 1280
         # height 720
 
-        frame = cv2.resize(frame, (1920, 1024))
+        cv2.imshow(frame)
+        # frame = cv2.resize(frame, (1920, 1024))
 
-        frame = frame[200: 800, 250:1000 ]
+        # frame = frame[200: 800, 250:1000 ]
         if not ret:
             break
 

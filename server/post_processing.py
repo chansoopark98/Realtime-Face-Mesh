@@ -1,10 +1,6 @@
 import cv2
 import numpy as np
 
-from .TFLiteFaceDetection import UltraLightFaceDetecion
-from .TFLiteFaceAlignment import DenseFaceReconstruction, DepthFacialLandmarks
-from .CtypesMeshRender import TrianglesMeshRender
-
 
 def rotationMatrixToEulerAngles(R):
     '''
@@ -108,6 +104,8 @@ def pose(frame, results, color):
 
     # decompose matrix to ruler angle
     euler = rotationMatrixToEulerAngles(R)
-    print(f"Pitch: {euler[0]}; Yaw: {euler[1]}; Roll: {euler[2]};")
+    # print(f"Pitch: {euler[0]}; Yaw: {euler[1]}; Roll: {euler[2]};")
 
     draw_projection(frame, R, landmarks, color)
+
+    return euler
