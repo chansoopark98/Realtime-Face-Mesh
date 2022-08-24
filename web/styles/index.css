@@ -1,0 +1,115 @@
+/* @font-face {
+	font-family: "NanumGothic";
+	src: url("../assets/fonts/NanumGothic.svg#NanumGothic") format("svg"),
+		url("../assets/fonts/NanumGothic.ttf") format("truetype"),
+		url("../assets/fonts/NanumGothic.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "NotoSans";
+	src: url("../assets/fonts/NotoSansKR-Bold-Alphabetic.svg#NotoSansKR-Bold-Alphabetic") format("svg"),
+		url("../assets/fonts/NotoSansKR-Bold-Alphabetic.ttf") format("truetype"),
+		url("../assets/fonts/NotoSansKR-Bold-Alphabetic.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "NanumSquare";
+	src: url("../assets/fonts/NanumSquareEB.svg#NanumSquareEB") format("svg"),
+		url("../assets/fonts/NanumSquareEB.ttf") format("truetype"),
+		url("../assets/fonts/NanumSquareEB.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+} */
+
+html, body {
+	margin: 0 auto;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-webkit-tap-highlight-color:rgba(0, 0, 0, 0);
+}
+
+#loading {
+	width: 100%;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.45);
+	z-index: 9999999;
+}
+
+#loading img {
+    height: auto;
+	width: 60%;
+}
+
+#loading span{
+	font-weight: bold;
+	color: white;
+	font-size: 18px;
+	padding-top: 30px;
+	font-family: sans-serif;
+}
+
+#ar-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#video {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+	
+}
+
+#render_area {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 100;
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+	
+}
+
+#render_ar {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 101;
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+	
+}
+
+button {
+	/* margin-right: 5rem; */
+	position: relative;
+	/* top: 1000px; */
+	/* left: 150px; */
+	z-index: 102;
+	width: 50%;
+	height: 10%;
+}
