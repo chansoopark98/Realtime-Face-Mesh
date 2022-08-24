@@ -42,7 +42,7 @@ camera.position.z = 10;
 
 var modelLists = [];
 
-loader.load('assets/Anna_OBJ/head.gltf', function ( gltf ) {
+loader.load('assets/objects/head.gltf', function ( gltf ) {
     gltf.scene.scale.set(3.2, 3.2, 3.2);			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible=true;
@@ -59,7 +59,7 @@ loader.load('assets/Anna_OBJ/head.gltf', function ( gltf ) {
 } );
 
 
-loader.load('assets/Anna_OBJ/trump.gltf', function ( gltf ) {
+loader.load('assets/objects/trump.gltf', function ( gltf ) {
     gltf.scene.scale.set(1, 1, 1 );			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = false;
