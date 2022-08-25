@@ -7,8 +7,11 @@ import base64
 import service
 import cv2
 import math
-
+from pyk4a import Config, PyK4A
+import pyk4a
 from post_processing import pose, sparse
+
+
 
 
 class TCPServer(object):
@@ -27,8 +30,20 @@ class TCPServer(object):
         self.sx = 640
         self.sy = 240
         self.image_shape = (960, 1280) # H,W
-
+        
         self.load_model()
+        # self.k4a = PyK4A(
+        #     Config(
+        #         color_resolution=pyk4a.ColorResolution.OFF,
+        #         depth_mode=pyk4a.DepthMode.NFOV_UNBINNED,
+        #         synchronized_images_only=False,
+        #         disable_streaming_indicator=True,
+        #         )
+        # )
+        # self.k4a.start()
+
+        cv2.VideoCapture(0)
+        
 
     
     def load_model(self):
@@ -73,6 +88,10 @@ class TCPServer(object):
         
         # cv2.imshow('test', frame)
         # cv2.waitKey(1)
+
+        # capture = k4a.get_capture()
+        # img_color = capture.depth
+        # print(img_color)
 
         if number_samples >= 1:
 
