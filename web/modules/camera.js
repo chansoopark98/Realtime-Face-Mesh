@@ -12,6 +12,7 @@
      return (base + `\n${text}\n` +base);
  }
  
+ 
  function getUserAgent() {
      return navigator.userAgent.toLowerCase();
  }
@@ -23,7 +24,7 @@
  
          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
              const deviceList = await navigator.mediaDevices.enumerateDevices();
-     
+             console.log(deviceList);
              for (let i = 0; i < deviceList.length; i++) {
                  const device = deviceList[i];
      
@@ -31,16 +32,16 @@
                      const deviceId = device.deviceId;
      
                      const constraints = {
-                         audio: false,
-                         video: {
-                             deviceId: deviceId
-                         },
-                         zoom: true
+                        //  audio: false,
+                         video: true,
+                        //  zoom: true,
+                         depth: true
                      };
      
                      const stream = await navigator.mediaDevices.getUserMedia(constraints);
                      const supports = navigator.mediaDevices.getSupportedConstraints();
-                     
+                    
+            
                      
                      stream.getVideoTracks().forEach(track => {
                          const capabilities = track.getCapabilities();
@@ -76,7 +77,8 @@
      });
  }
  
- function openCamera(baseVideo, deviceId) {
+ function openCamera(baseVideo) {
+    
      return new Promise((reserve, reject) => {
          let video = {
             //  minWidth: 1920,
@@ -90,11 +92,12 @@
             height: 1440
          }
      
-         if (deviceId == "ios") {
-             video.facingMode = "environment";
-         } else {
-             video.deviceId = deviceId;
-         }
+        //  if (deviceId == "ios") {
+        //      video.facingMode = "environment";
+        //  }
+        //  } else {
+        //      video.deviceId = deviceId;
+        //  }
      
          let constraints = {
              audio: false,
@@ -104,9 +107,7 @@
      
          navigator.mediaDevices.getUserMedia(constraints).then(stream => {
              stream.getVideoTracks().forEach(track => {
-                 //console.log(track);
-                 console.log(stream.getVideoTracks());
-                 console.log(track.getSettings());
+                
              });
              
              baseVideo.srcObject = stream;
@@ -121,28 +122,28 @@
  function getCamera(baseVideo) {
      const userAgent = getUserAgent();
  
-     if (userAgent.match("iphone") || userAgent.match("ipad") || userAgent.match("ipod") || userAgent.match("mac")) {
-         isIOS = true;
-         isMobile = true;
-        //  if (!userAgent.match("safari") || userAgent.match("naver") || userAgent.match("twitter")) {
-        //      isIOS = false;
-        //  }
-     } else {
-         isMobile = userAgent.match("Android") || userAgent.match("mobile");
-     }
+    //  if (userAgent.match("iphone") || userAgent.match("ipad") || userAgent.match("ipod") || userAgent.match("mac")) {
+    //      isIOS = true;
+    //      isMobile = true;
+    //     //  if (!userAgent.match("safari") || userAgent.match("naver") || userAgent.match("twitter")) {
+    //     //      isIOS = false;
+    //     //  }
+    //  } else {
+    //      isMobile = userAgent.match("Android") || userAgent.match("mobile");
+    //  }
  
      getCameraSpecification().then((cameraList) => {
-         let cameraId = "";
- 
+        //  let cameraId = "";
+         console.log(cameraList);
          if (cameraList.length > 0) {
              cameraId = cameraList[0];
          }
-         else if (isIOS) {
-             cameraId = "ios";
-         }
+        //  else if (isIOS) {
+        //      cameraId = "ios";
+        //  }
 
  
-         openCamera(baseVideo, cameraId).then((camAct, stream) => {
+         openCamera(baseVideo).then((camAct, stream) => {
              if (camAct) {
                  return stream
              }

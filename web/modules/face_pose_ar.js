@@ -1,17 +1,25 @@
 /*
   2022 Kintex Face pose detection demo
 */
-
 // Import modules
 import { GLTFLoader } from '../gltf/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from '../build/three.module.js'
 
+
+/*
+    ----------------------<<< Global variable >>>----------------------
+*/
+
 // Set global variable
-var model; // GLTF 모델
-var secondModel;
-var factor = 1.0; // 비디오 퀄리티 팩터 (0 ~ 1)
-var camera_width = 2560; // 렌더링할 캔버스 너비
-var camera_height = 1440; // 렌더링할 캔버스 높이
+let camera_width = 2560; // 렌더링할 캔버스 너비
+let camera_height = 1440; // 렌더링할 캔버스 높이
+let modelLists = []; // 3d object models
+let pos = new THREE.Vector3(); // create once and reuse
+let vec = new THREE.Vector3(); // create once and reuse
+
+/* shape = [max_samples, (area, center_x, center_y, x_rot, y_rot, z_rot)] */
+let currentPoses = Array.from(Array(4), () => Array(6).fill(0));
+let targetPoses = Array.from(Array(4), () => Array(6).fill(0));
 
 // Configurate GLTF loader
 const loader = new GLTFLoader();
@@ -20,37 +28,41 @@ const originalVideo = document.getElementById('video');
 // Set video element listener (Async fuction)
 originalVideo.addEventListener('canplaythrough', render_ar_video);
 
-// Three.js 기본 설정
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(45, camera_width / camera_height, 1, 1000);
-var renderer = new THREE.WebGLRenderer({
+// Set Three.js Perspective camera and Renderer
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(45, camera_width / camera_height, 1, 1000);
+let renderer = new THREE.WebGLRenderer({
     canvas: render_ar,
-    alpha: true, preserveDrawingBuffer: true
+   alpha: true, 
+   preserveDrawingBuffer: true,
+   premultipliedAlpha: false
 });
 renderer.setSize(camera_width, camera_height);
 
-// renderer.setPixelRatio(window.devicePixelRatio * factor)
-// renderer.outputEncoding = THREE.sRGBEncoding;
+// Set Light source
+let pointLightRight = new THREE.PointLight(0xffffff);
+let pointLightLeft = new THREE.PointLight(0xffffff);
+let pointLightBottom = new THREE.PointLight(0xffffff);
+pointLightRight.position.set(100, 100, 0);
+pointLightLeft.position.set(-100, 100, 0);
+pointLightBottom.position.set(0, -100, 0);
+scene.add(pointLightRight);
+scene.add(pointLightLeft);
+scene.add(pointLightBottom);
 
-var pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(0, 300, 200);
-scene.add(pointLight);
-
+// Set default camera position
+camera.lookAt(0,0,0);
 camera.position.x = 0;
 camera.position.y = 0;
 camera.position.z = 10;
 
-var modelLists = [];
-
-loader.load('assets/objects/head.gltf', function ( gltf ) {
-    gltf.scene.scale.set(3.2, 3.2, 3.2);			   
+// Load models
+loader.load('assets/objects/test_head.glb', function ( gltf ) {
+    gltf.scene.scale.set(45, 45, 45);			   
     gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible=true;
+    gltf.scene.visible = true;
 
-    
-    model = gltf.scene;
-    console.log(model)
-    modelLists.push(model);
+    modelLists.push(gltf.scene);
     scene.add(gltf.scene);
     console.log('model load clear');
 
@@ -58,84 +70,67 @@ loader.load('assets/objects/head.gltf', function ( gltf ) {
 	console.error( error );
 } );
 
-
-loader.load('assets/objects/head.gltf', function ( gltf ) {
-  gltf.scene.scale.set(3.2, 3.2, 3.2);
+loader.load('assets/objects/test_head.glb', function ( gltf ) {
+    gltf.scene.scale.set(45, 45, 45);
     gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible = false;
+    gltf.scene.visible = true;
 
-    secondModel = gltf.scene;
-    modelLists.push(secondModel);
-    scene.add(secondModel);       
+    modelLists.push(gltf.scene);
+    scene.add(gltf.scene);       
 
 }, undefined, function ( error ) {
 	console.error( error );
 } );
 
 
+/*
+    ----------------------<<< Function >>>----------------------
+*/
 
-
-
-
+// Object들의 시각화 여부를 제어하는 함수
 function visibleHandler(Idx, bool){
     modelLists[Idx].visible = bool;
 }
 
-
-function changeRotationAndPosition(idx, center_x, center_y, area, x_rot, y_rot, z_rot){
-    // center_x = center_x - (center_x * (y_rot * 10));
-
-    center_y = center_y + 120;
-    
-    
-
-    // var new_scale = 1 + area.toFixed(2);
-    // model.scale.set(new_scale, new_scale, new_scale);
-    var new_scale = (2.8 + area * 3.5).toFixed(2);
-    console.log(new_scale);
-    modelLists[idx].scale.set(new_scale, new_scale, new_scale);
-    
-
-    var pos = new THREE.Vector3(); // create once and reuse
-    var vec = new THREE.Vector3(); // create once and reuse
+// Websocket을 통해 얻은 정보를 바탕으로 object들의 위치 및 회전을 update
+function updateRotationAndPosition(idx, center_x, center_y, area, x_rot, y_rot, z_rot) {
     vec.set(
-        (( center_x / camera_width ) * 2 - 1).toFixed(4),
-        (- ( center_y / camera_height ) * 2 + 1).toFixed(4),
-        0.5); 
-
-    vec.unproject(camera);
+        ((center_x / camera_width) * 2 - 1).toFixed(2),
+        (- (center_y / camera_height) * 2 + 1).toFixed(2),
+        0.5);
     
+    vec.unproject(camera);
     vec.sub(camera.position).normalize();
     
-    var distance = - camera.position.z / vec.z;
-    
-    var value = vec.multiplyScalar( distance.toFixed(4) );
-  
-    if (idx == 0) {
-        
-        model.position.x = (pos.x + value.x).toFixed(3);
-        model.position.y = (pos.y + value.y).toFixed(3);
+    // var distance = - camera.position.z / vec.z;
+    var distance = - camera.position.z / -1;
 
-        model.rotation.x = (-x_rot).toFixed(2);
-        model.rotation.y = (-y_rot).toFixed(2);
-        model.rotation.z = (-z_rot).toFixed(2);
-        
-        
-    }
-    else{
-        secondModel.position.x = (pos.x + value.x);
-        secondModel.position.y = (pos.y + value.y);
-        // secondModel.rotation.x = -x_rot * 15;
-        // secondModel.rotation.y = y_rot * 30;
-    }
+    var value = vec.multiplyScalar(distance.toFixed(2));
     
+    // console.log((value.x).toFixed);
     
+    modelLists[idx].position.x = (pos.x + value.x).toFixed(2);
+    modelLists[idx].position.y = (pos.y + value.y).toFixed(2);
+
+    modelLists[idx].rotation.x = (-x_rot).toFixed(2);
+    modelLists[idx].rotation.y = (-y_rot).toFixed(2);
+    modelLists[idx].rotation.z = (-z_rot).toFixed(2);
+
+    // targetPoses[idx][0] = area;
+    // targetPoses[idx][1] = modelLists[idx].position.x;
+    // targetPoses[idx][2] = modelLists[idx].position.y;
+    // targetPoses[idx][3] = modelLists[idx].rotation.x;
+    // targetPoses[idx][4] = modelLists[idx].rotation.y;
+    // targetPoses[idx][5] = modelLists[idx].rotation.z;
+
+    // console.log(targetPoses[idx]);
 }
 
-async function render_ar_video(){
-  renderer.render(scene, camera);
-  await requestAnimationFrame(render_ar_video);
-  // setTimeout(render_ar_video, 1)
+async function render_ar_video() {
+    // console.log('render')
+    renderer.render(scene, camera);
+    // await requestAnimationFrame(render_ar_video);
+    setTimeout(render_ar_video, 1)
 }
 
-export { visibleHandler, changeRotationAndPosition};
+export { visibleHandler, updateRotationAndPosition};

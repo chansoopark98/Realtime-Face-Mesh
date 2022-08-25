@@ -7,8 +7,8 @@ import numpy as np
 class UltraLightFaceDetecion():
     def __init__(self, filepath, input_size=(320, 240), conf_threshold=0.6,
                  center_variance=0.1, size_variance=0.2,
-                 nms_max_output_size=200, nms_iou_threshold=0.3) -> None:
-
+                 nms_max_output_size=200, nms_iou_threshold=0.5) -> None:
+        # nms_iou_threshold 0.3 (default)
         self._feature_maps = np.array([[40, 30], [20, 15], [10, 8], [5, 4]])
         self._min_boxes = [[10, 16, 24], [32, 48], [64, 96], [128, 192, 256]]
 
@@ -66,6 +66,8 @@ class UltraLightFaceDetecion():
     def _pre_processing(self, img):
         resized = self._resize(img)
         image_rgb = resized[..., ::-1]
+        cv2.imshow('test', image_rgb)
+        cv2.waitKey(1)
         image_norm = image_rgb.astype(np.float32)
         cv2.normalize(image_norm, image_norm,
                       alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX)

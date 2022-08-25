@@ -1,34 +1,52 @@
 import * as camera_util from "./camera.js";
-import { visibleHandler, changeRotationAndPosition} from "./face_pose_ar.js";
+import { visibleHandler, updateRotationAndPosition} from "./face_pose_ar.js";
 
+/*
+    ----------------------<<< Global variable >>>----------------------
+*/
+// Crop할 VideoElement의 시작 x축 위치 (xmin)
 let sx = 640;
+// Crop할 VideoElement의 시작 y축 위치 (ymin)
 let sy = 240;
+// Crop할 영역의 너비 (width)
 let dx = 1280;
+// Crop할 영역의 높이 (height)
 let dy = 960;
 
+/* Object 위치 update에 사용 할 전역 변수 리스트 */
+// Object의 Box 중심 x,y
 let center_x = 0;
 let center_y = 0;
+// Object의 너비 비율 (0 ~ 1)
 let area = 0;
+// Object의 각 축별 회전 값 (Radians)
 let x_rot = 0;
 let y_rot = 0;
 let z_rot = 0;
+// 검출된 Object 개수
 let targetLoop = 0;
+// 제한할 최대 Object 개수
 let maxObjNums = 2;
 
+// 딥러닝 연산 처리를 위한 Websocket
 const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
 
-// 이미지를 저장하기 위한 canvas 생성
+// 효과 및 다양한 이펙트를 표현하기 위한 canvas
 const canvas = document.getElementById('render_area');
-const sendCanvas = document.getElementById('send_canvas');
-sendCanvas.width = dx;
-sendCanvas.height = dy;
-canvas.width = 2560;
-canvas.height = 1440;
-
+canvas.width = 2560; // VideoElement width
+canvas.height = 1440; // VideoElement height
 let context = canvas.getContext('2d');
 context.strokeStyle = "#B40404";
 context.lineWidth = 6;
 context.strokeRect(sx, sy, dx, dy);
+
+// Video frame을 Websocket으로 전송하기 위한 이미지 전송용 canvas
+const sendCanvas = document.getElementById('send_canvas');
+sendCanvas.width = dx;
+sendCanvas.height = dy;
+
+
+
 let sendContext = sendCanvas.getContext('2d');
                 
 const videoElement = document.getElementById('video');
@@ -65,7 +83,6 @@ webSocket.onmessage = function(message){
         targetLoop = 0;
     }
     
-    console.log(targetLoop);  
     for (let detectIdx=1; detectIdx<=targetLoop; detectIdx++){
   
         let idx = detectIdx * 6;
@@ -77,7 +94,7 @@ webSocket.onmessage = function(message){
         y_rot = parseFloat(recvData[idx-2]);
         z_rot = parseFloat(recvData[idx-1]);
         
-        changeRotationAndPosition(detectIdx - 1,
+        updateRotationAndPosition(detectIdx - 1,
                                   center_x,
                                   center_y,
                                   area,

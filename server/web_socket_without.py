@@ -33,7 +33,7 @@ class TCPServer(object):
     
     def load_model(self):
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                        conf_threshold=0.8)
+                                        conf_threshold=0.9, nms_iou_threshold=0.3)
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
 
         self.handler = getattr(service, 'pose')
@@ -44,22 +44,17 @@ class TCPServer(object):
         output = ''
         angles = []
 
-
         base64_data = data[0]
         imgdata = base64.b64decode(base64_data)
         frame = np.frombuffer(imgdata, np.uint8)
         frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
 
-        
-        
          # face detection
         boxes, _ = self.fd.inference(frame) # boxes, scores
 
         feed = frame.copy()
 
         for results in self.fa.get_landmarks(feed, boxes):
-            
-            
             angle = pose(frame, results, (255, 102, 51)) # (3,)
             sparse(frame, results, (51, 255, 51))
             batch_roll, batch_pitch, batch_yaw = angle
@@ -76,8 +71,8 @@ class TCPServer(object):
         # boxes (N, 4)
         number_samples = angles.shape[0]
         
-        cv2.imshow('test', frame)
-        cv2.waitKey(1)
+        # cv2.imshow('test', frame)
+        # cv2.waitKey(1)
 
         if number_samples >= 1:
 
@@ -99,15 +94,16 @@ class TCPServer(object):
                 if abs(self.prev_y[idx] - center_y) > 5:
                     self.prev_y[idx] = center_y
 
-                if abs(self.prev_angles[idx, 0] - angles[idx, 0]) >= 0.1:
+                if abs(self.prev_angles[idx, 0] - angles[idx, 0]) >= 0.08:
                     self.prev_angles[idx, 0] = angles[idx, 0]
 
-                if abs(self.prev_angles[idx, 1] - angles[idx, 1]) >= 0.2:
+                if abs(self.prev_angles[idx, 1] - angles[idx, 1]) >= 0.08:
                     self.prev_angles[idx, 1] = angles[idx, 1]
                 
-                if abs(self.prev_angles[idx, 2] - angles[idx, 2]) >= 0.1:
+                if abs(self.prev_angles[idx, 2] - angles[idx, 2]) >= 0.08:
                     self.prev_angles[idx, 2] = angles[idx, 2]
 
+                print(self.prev_angles[idx])
                 # Normalize scale
                 scaled_width = width / self.image_shape[1]
                 scaled_height = height / self.image_shape[0]
@@ -115,24 +111,23 @@ class TCPServer(object):
 
                 center_x = str(self.prev_x[idx, 0]) + ','
                 center_y = str(self.prev_y[idx, 0]) + ','
-                area = str(area) + ','
-                roll = str(round(self.prev_angles[idx, 0], 1)) + ','
-                pitch = str(round(self.prev_angles[idx, 1], 1)) + ','
-                yaw = str(round(self.prev_angles[idx, 2], 1)) + ','
+                area = str(round(area, 2)) + ','
+                roll = str(round(self.prev_angles[idx, 0], 2)) + ','
+                pitch = str(round(self.prev_angles[idx, 1], 2)) + ','
+                yaw = str(round(self.prev_angles[idx, 2], 2)) + ','
+
+
 
                 face_results = center_x + center_y + area + roll + pitch + yaw
                 output += face_results
 
             # print(output)
-
+        # print(output)
         return output
         
 
     async def loop_logic(self, websocket, path):
-
-
-        while True:
-                
+        while True:    
             # Wait data from client
             data = await asyncio.gather(websocket.recv())
             rcv_data = self.rcv_data(data=data, websocket=websocket)

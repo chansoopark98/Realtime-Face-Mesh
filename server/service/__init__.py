@@ -5,7 +5,6 @@ from .TFLiteFaceDetection import UltraLightFaceDetecion
 from .TFLiteFaceAlignment import DenseFaceReconstruction, DepthFacialLandmarks
 from .CtypesMeshRender import TrianglesMeshRender
 
-
 def rotationMatrixToEulerAngles(R):
     '''
     Ref: https://stackoverflow.com/a/15029416
