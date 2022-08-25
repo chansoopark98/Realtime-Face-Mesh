@@ -7,14 +7,45 @@ import base64
 import service
 import cv2
 import math
-from pyk4a import Config, PyK4A
-import pyk4a
+
 from post_processing import pose, sparse
 
+import pyzed.sl as sl
+import sys
+
+class ConfigureZedCamera(object):
+    def __init__(self):
+
+        self.zed = sl.Camera()
+        print(self.zed)
+        # Set configuration parameters
+        input_type = sl.InputType()
+        # print(len(sys.argv))
+        # if len(sys.argv) >= 2 :
+        
+        self.init = sl.InitParameters()
+        # self.init.camera_resolution = sl.RESOLUTION.HD1080
+        self.init.depth_mode = sl.DEPTH_MODE.PERFORMANCE
+        # self.init.coordinate_units = sl.UNIT.MILLIMETER
+
+        self.runtime = sl.RuntimeParameters()
+        self.runtime.sensing_mode = sl.SENSING_MODE.STANDARD
+
+        self.image_size = self.zed.get_camera_information().camera_resolution
+        self.image_size.width = self.image_size.width /2
+        self.image_size.height = self.image_size.height /2
+
+        self.depth_image_zed = sl.Mat(self.image_size.width, self.image_size.height, sl.MAT_TYPE.U8_C4)
+        err = self.zed.open(self.init)
+        if err != sl.ERROR_CODE.SUCCESS :
+            print(repr(err))
+            self.zed.close()
+            exit(1)
+
+        
 
 
-
-class TCPServer(object):
+class TCPServer(ConfigureZedCamera):
     def __init__(self, hostname, port, cert_dir, key_dir):
         super().__init__()
         self.hostname = hostname
@@ -41,8 +72,6 @@ class TCPServer(object):
         #         )
         # )
         # self.k4a.start()
-
-        cv2.VideoCapture(0)
         
 
     
@@ -55,6 +84,14 @@ class TCPServer(object):
         self.color = (224, 255, 255)
 
     def rcv_data(self, data, websocket):
+        # get depth frame
+        err = self.zed.grab(self.runtime)
+        # if err == sl.ERROR_CODE.SUCCESS :
+        self.zed.retrieve_image(self.depth_image_zed, sl.VIEW.DEPTH, sl.MEM.CPU, self.image_size)
+        depth_image_ocv = self.depth_image_zed.get_data()
+        cv2.imshow("Depth", depth_image_ocv)
+        cv2.waitKey(10)
+
         # initailize
         output = ''
         angles = []
@@ -156,10 +193,11 @@ class TCPServer(object):
 
 
     def run_server(self):
-        self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        self.ssl_context.load_cert_chain(self.cert_dir, self.key_dir)
         if use_local:
             self.ssl_context = None
+        else:
+            self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            self.ssl_context.load_cert_chain(self.cert_dir, self.key_dir)
         self.start_server = websockets.serve(self.loop_logic,
                                              port=self.port, ssl=self.ssl_context,
                                              max_size=400000,
@@ -171,7 +209,7 @@ class TCPServer(object):
         
 
 if __name__ == "__main__":
-    use_local = False
+    use_local = True
 
     if use_local:
         hostname = '127.0.0.1'

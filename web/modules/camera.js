@@ -32,10 +32,9 @@
                      const deviceId = device.deviceId;
      
                      const constraints = {
-                        //  audio: false,
+                         audio: false,
                          video: true,
-                        //  zoom: true,
-                         depth: true
+                        //  zoom: true
                      };
      
                      const stream = await navigator.mediaDevices.getUserMedia(constraints);
