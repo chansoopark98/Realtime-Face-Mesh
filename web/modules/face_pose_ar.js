@@ -59,14 +59,14 @@ loader.load('assets/objects/head.gltf', function ( gltf ) {
 } );
 
 
-loader.load('assets/objects/trump.gltf', function ( gltf ) {
-    gltf.scene.scale.set(1, 1, 1 );			   
+loader.load('assets/objects/head.gltf', function ( gltf ) {
+  gltf.scene.scale.set(3.2, 3.2, 3.2);
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = false;
 
     secondModel = gltf.scene;
     modelLists.push(secondModel);
-    scene.add(secondModel);
+    scene.add(secondModel);       
 
 }, undefined, function ( error ) {
 	console.error( error );
@@ -82,11 +82,20 @@ function visibleHandler(Idx, bool){
 }
 
 
-function changeRotationAndPosition(idx, center_x, center_y, x_rot, y_rot, z_rot){
+function changeRotationAndPosition(idx, center_x, center_y, area, x_rot, y_rot, z_rot){
     // center_x = center_x - (center_x * (y_rot * 10));
 
-    // center_y = center_y + 150;
+    center_y = center_y + 120;
     
+    
+
+    // var new_scale = 1 + area.toFixed(2);
+    // model.scale.set(new_scale, new_scale, new_scale);
+    var new_scale = (2.8 + area * 3.5).toFixed(2);
+    console.log(new_scale);
+    modelLists[idx].scale.set(new_scale, new_scale, new_scale);
+    
+
     var pos = new THREE.Vector3(); // create once and reuse
     var vec = new THREE.Vector3(); // create once and reuse
     vec.set(
@@ -109,6 +118,7 @@ function changeRotationAndPosition(idx, center_x, center_y, x_rot, y_rot, z_rot)
 
         model.rotation.x = (-x_rot).toFixed(2);
         model.rotation.y = (-y_rot).toFixed(2);
+        model.rotation.z = (-z_rot).toFixed(2);
         
         
     }
@@ -122,14 +132,10 @@ function changeRotationAndPosition(idx, center_x, center_y, x_rot, y_rot, z_rot)
     
 }
 
-function switch_visible(visible_flag){
-  mesh.visible = visible_flag;
-}
-
 async function render_ar_video(){
   renderer.render(scene, camera);
-//   await requestAnimationFrame(render_ar_video);
-  setTimeout(render_ar_video, 1)
+  await requestAnimationFrame(render_ar_video);
+  // setTimeout(render_ar_video, 1)
 }
 
-export {render_ar_video, switch_visible, visibleHandler, changeRotationAndPosition};
+export { visibleHandler, changeRotationAndPosition};

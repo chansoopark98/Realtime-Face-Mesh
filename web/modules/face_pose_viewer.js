@@ -1,13 +1,14 @@
 import * as camera_util from "./camera.js";
-import { render_ar_video, switch_visible, visibleHandler, changeRotationAndPosition} from "./face_pose_ar.js";
+import { visibleHandler, changeRotationAndPosition} from "./face_pose_ar.js";
 
-let sx = 880;
-let sy = 420;
-let dx = 800;
-let dy = 600;
+let sx = 640;
+let sy = 240;
+let dx = 1280;
+let dy = 960;
 
 let center_x = 0;
 let center_y = 0;
+let area = 0;
 let x_rot = 0;
 let y_rot = 0;
 let z_rot = 0;
@@ -19,12 +20,15 @@ const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
 // 이미지를 저장하기 위한 canvas 생성
 const canvas = document.getElementById('render_area');
 const sendCanvas = document.getElementById('send_canvas');
-sendCanvas.width = 800;
-sendCanvas.height = 600;
+sendCanvas.width = dx;
+sendCanvas.height = dy;
 canvas.width = 2560;
 canvas.height = 1440;
 
 let context = canvas.getContext('2d');
+context.strokeStyle = "#B40404";
+context.lineWidth = 6;
+context.strokeRect(sx, sy, dx, dy);
 let sendContext = sendCanvas.getContext('2d');
                 
 const videoElement = document.getElementById('video');
@@ -54,8 +58,8 @@ webSocket.onmessage = function(message){
 
     let recvData = message.data.split(',');
     
-    if (recvData.length >=5){
-        targetLoop = recvData.length/5
+    if (recvData.length >=6){
+        targetLoop = recvData.length/6
     }
     else{
         targetLoop = 0;
@@ -64,10 +68,11 @@ webSocket.onmessage = function(message){
     console.log(targetLoop);  
     for (let detectIdx=1; detectIdx<=targetLoop; detectIdx++){
   
-        let idx = detectIdx * 5;
+        let idx = detectIdx * 6;
         
-        center_x = parseFloat(recvData[idx-5]);
-        center_y = parseFloat(recvData[idx-4]);
+        center_x = parseInt(recvData[idx-6]);
+        center_y = parseInt(recvData[idx-5]);
+        area = parseFloat(recvData[idx-4]);
         x_rot = parseFloat(recvData[idx-3]);
         y_rot = parseFloat(recvData[idx-2]);
         z_rot = parseFloat(recvData[idx-1]);
@@ -75,6 +80,7 @@ webSocket.onmessage = function(message){
         changeRotationAndPosition(detectIdx - 1,
                                   center_x,
                                   center_y,
+                                  area,
                                   x_rot,
                                   y_rot,
                                   z_rot);
