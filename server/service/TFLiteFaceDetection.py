@@ -66,8 +66,6 @@ class UltraLightFaceDetecion():
     def _pre_processing(self, img):
         resized = self._resize(img)
         image_rgb = resized[..., ::-1]
-        cv2.imshow('test', image_rgb)
-        cv2.waitKey(1)
         image_norm = image_rgb.astype(np.float32)
         cv2.normalize(image_norm, image_norm,
                       alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX)

@@ -57,7 +57,7 @@ camera.position.y = 0;
 camera.position.z = 10;
 
 // Load models
-loader.load('assets/objects/test_head.glb', function ( gltf ) {
+loader.load('assets/objects/head01.glb', function ( gltf ) {
     gltf.scene.scale.set(45, 45, 45);			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
@@ -70,7 +70,7 @@ loader.load('assets/objects/test_head.glb', function ( gltf ) {
 	console.error( error );
 } );
 
-loader.load('assets/objects/test_head.glb', function ( gltf ) {
+loader.load('assets/objects/head01.glb', function ( gltf ) {
     gltf.scene.scale.set(45, 45, 45);
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
