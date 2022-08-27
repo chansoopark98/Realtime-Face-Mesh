@@ -3,6 +3,7 @@
 */
 // Import modules
 import { GLTFLoader } from '../gltf/examples/jsm/loaders/GLTFLoader.js';
+import { RoomEnvironment } from '../gltf/examples/jsm/environments/RoomEnvironment.js';
 import * as THREE from '../build/three.module.js'
 
 
@@ -43,12 +44,15 @@ renderer.setSize(camera_width, camera_height);
 let pointLightRight = new THREE.PointLight(0xffffff);
 let pointLightLeft = new THREE.PointLight(0xffffff);
 let pointLightBottom = new THREE.PointLight(0xffffff);
+let pointLightCenter = new THREE.PointLight(0xffffff);
 pointLightRight.position.set(100, 100, 0);
 pointLightLeft.position.set(-100, 100, 0);
 pointLightBottom.position.set(0, -100, 0);
+pointLightCenter.position.set(0, 30, 100);
 scene.add(pointLightRight);
 scene.add(pointLightLeft);
 scene.add(pointLightBottom);
+scene.add(pointLightCenter);
 
 // Set default camera position
 camera.lookAt(0,0,0);
@@ -93,7 +97,15 @@ function visibleHandler(Idx, bool){
 }
 
 // Websocket을 통해 얻은 정보를 바탕으로 object들의 위치 및 회전을 update
-function updateRotationAndPosition(idx, center_x, center_y, area, x_rot, y_rot, z_rot) {
+function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot, z_rot) {
+
+    console.log(scale);
+
+    // x * 0.36 = 45
+    scale = (125 * scale).toFixed(0);
+    console.log(scale);
+    modelLists[idx].scale.set(scale, scale, scale)
+
     vec.set(
         ((center_x / camera_width) * 2 - 1).toFixed(2),
         (- (center_y / camera_height) * 2 + 1).toFixed(2),

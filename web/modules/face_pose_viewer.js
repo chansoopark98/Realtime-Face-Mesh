@@ -18,7 +18,7 @@ let dy = 960;
 let center_x = 0;
 let center_y = 0;
 // Object의 너비 비율 (0 ~ 1)
-let area = 0;
+let scale = 0;
 // Object의 각 축별 회전 값 (Radians)
 let x_rot = 0;
 let y_rot = 0;
@@ -71,7 +71,7 @@ webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시
         webSocket.send(sendData.split(",")[1]);
         
     }
-}, 50);
+}, 30);
 
 webSocket.onmessage = function(message){  
 
@@ -90,7 +90,7 @@ webSocket.onmessage = function(message){
         
         center_x = parseInt(recvData[idx-6]);
         center_y = parseInt(recvData[idx-5]);
-        area = parseFloat(recvData[idx-4]);
+        scale = parseFloat(recvData[idx-4]);
         x_rot = parseFloat(recvData[idx-3]);
         y_rot = parseFloat(recvData[idx-2]);
         z_rot = parseFloat(recvData[idx-1]);
@@ -98,7 +98,7 @@ webSocket.onmessage = function(message){
         updateRotationAndPosition(detectIdx - 1,
                                   center_x,
                                   center_y,
-                                  area,
+                                  scale,
                                   x_rot,
                                   y_rot,
                                   z_rot);
