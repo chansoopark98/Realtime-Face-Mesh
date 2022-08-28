@@ -61,7 +61,7 @@ camera.position.y = 0;
 camera.position.z = 10;
 
 // Load models
-loader.load('assets/objects/head01.glb', function ( gltf ) {
+loader.load('assets/objects/head_01.glb', function ( gltf ) {
     gltf.scene.scale.set(45, 45, 45);			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
@@ -74,13 +74,71 @@ loader.load('assets/objects/head01.glb', function ( gltf ) {
 	console.error( error );
 } );
 
-loader.load('assets/objects/head01.glb', function ( gltf ) {
-    gltf.scene.scale.set(45, 45, 45);
+// Load models
+loader.load('assets/objects/head_02.glb', function ( gltf ) {
+    gltf.scene.scale.set(45, 45, 45);			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
 
     modelLists.push(gltf.scene);
-    scene.add(gltf.scene);       
+    scene.add(gltf.scene);
+    console.log('model load clear');
+
+}, undefined, function ( error ) {
+	console.error( error );
+} );
+
+// Load models
+loader.load('assets/objects/head_03.glb', function ( gltf ) {
+    gltf.scene.scale.set(45, 45, 45);			   
+    gltf.scene.position.set(0, 0, 0);
+    gltf.scene.visible = true;
+
+    modelLists.push(gltf.scene);
+    scene.add(gltf.scene);
+    console.log('model load clear');
+
+}, undefined, function ( error ) {
+	console.error( error );
+} );
+
+// Load models
+loader.load('assets/objects/head_04.glb', function ( gltf ) {
+    gltf.scene.scale.set(45, 45, 45);			   
+    gltf.scene.position.set(0, 0, 0);
+    gltf.scene.visible = true;
+
+    modelLists.push(gltf.scene);
+    scene.add(gltf.scene);
+    console.log('model load clear');
+
+}, undefined, function ( error ) {
+	console.error( error );
+} );
+
+// Load models
+loader.load('assets/objects/head_05.glb', function ( gltf ) {
+    gltf.scene.scale.set(45, 45, 45);			   
+    gltf.scene.position.set(0, 0, 0);
+    gltf.scene.visible = true;
+
+    modelLists.push(gltf.scene);
+    scene.add(gltf.scene);
+    console.log('model load clear');
+
+}, undefined, function ( error ) {
+	console.error( error );
+} );
+
+// Load models
+loader.load('assets/objects/head_06.glb', function ( gltf ) {
+    gltf.scene.scale.set(45, 45, 45);			   
+    gltf.scene.position.set(0, 0, 0);
+    gltf.scene.visible = true;
+
+    modelLists.push(gltf.scene);
+    scene.add(gltf.scene);
+    console.log('model load clear');
 
 }, undefined, function ( error ) {
 	console.error( error );
@@ -99,11 +157,11 @@ function visibleHandler(Idx, bool){
 // Websocket을 통해 얻은 정보를 바탕으로 object들의 위치 및 회전을 update
 function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot, z_rot) {
 
-    console.log(scale);
+    
+    center_y = center_y - 30;
 
-    // x * 0.36 = 45
-    scale = (125 * scale).toFixed(0);
-    console.log(scale);
+    scale = (170 * scale).toFixed(0);
+
     modelLists[idx].scale.set(scale, scale, scale)
 
     vec.set(
@@ -119,8 +177,6 @@ function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot,
 
     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    // console.log((value.x).toFixed);
-    
     modelLists[idx].position.x = (pos.x + value.x).toFixed(2);
     modelLists[idx].position.y = (pos.y + value.y).toFixed(2);
 
@@ -128,14 +184,8 @@ function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot,
     modelLists[idx].rotation.y = (-y_rot).toFixed(2);
     modelLists[idx].rotation.z = (-z_rot).toFixed(2);
 
-    // targetPoses[idx][0] = area;
-    // targetPoses[idx][1] = modelLists[idx].position.x;
-    // targetPoses[idx][2] = modelLists[idx].position.y;
-    // targetPoses[idx][3] = modelLists[idx].rotation.x;
-    // targetPoses[idx][4] = modelLists[idx].rotation.y;
-    // targetPoses[idx][5] = modelLists[idx].rotation.z;
+    console.log(scale);
 
-    // console.log(targetPoses[idx]);
 }
 
 async function render_ar_video() {

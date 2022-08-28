@@ -27,6 +27,19 @@ class LowPassFilter(object):
         return val
 
 
+# class LowPassFilter(object):
+#     def __init__(self, alpha):
+#         self.prevX = 0
+#         self.alpha = alpha
+    
+#     def filter(self, x):
+#         # low pass filter 
+#         x_lpf = self.alpha * self.prevX + (1 - self.alpha)*x
+#         # 이전 스텝 값 갱신
+#         self.prevX = x_lpf
+#         return x_lpf  
+
+
 class TCPServer():
     def __init__(self, hostname, port, cert_dir, key_dir):
         super().__init__()
@@ -44,15 +57,23 @@ class TCPServer():
         self.sy = 240
         self.image_shape = (960, 1280) # H,W
         
-        self.scale_filter = LowPassFilter(1., 1/15)
-        self.x_angle_filter = LowPassFilter(1., 1/15)
-        self.y_angle_filter = LowPassFilter(1., 1/15)
-        self.z_angle_filter = LowPassFilter(1., 1/15)
+        self.scale_filter = LowPassFilter(1/5., 1/20)
+        self.x_trans_filter = LowPassFilter(1., 1/20)
+        self.y_trans_filter = LowPassFilter(1., 1/20)
+        self.x_angle_filter = LowPassFilter(1., 1/20)
+        self.y_angle_filter = LowPassFilter(1., 1/20)
+        self.z_angle_filter = LowPassFilter(1., 1/20)
+        # self.scale_filter =   LowPassFilter(0.8)
+        # self.x_trans_filter = LowPassFilter(0.8)
+        # self.y_trans_filter = LowPassFilter(0.8)
+        # self.x_angle_filter = LowPassFilter(0.8)
+        # self.y_angle_filter = LowPassFilter(0.8)
+        # self.z_angle_filter = LowPassFilter(0.8)
         self.load_model()
     
     def load_model(self):
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                        conf_threshold=0.9, nms_iou_threshold=0.3)
+                                        conf_threshold=0.9, nms_iou_threshold=0.5)
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
         self.handler = getattr(service, 'pose')
         self.color = (224, 255, 255)
@@ -88,12 +109,22 @@ class TCPServer():
 
             points = np.round(landmarks).astype(np.int)
             
-            x0, y0 = tuple(points[0])
-            x1, y1 = tuple(points[16])
+            x0, y0 = tuple(points[1])
+            x1, y1 = tuple(points[15])
             
-            x_vector = abs(int(((x1 - x0) * math.cos(batch_roll))))
-            y_vector = abs(int(((y1 - y0) * math.sin(batch_pitch))))
-            vector = int((x_vector + y_vector) * math.sqrt(math.e))
+
+            x_angle = batch_roll
+            y_angle = batch_pitch
+
+            if batch_pitch > 0:
+                y_angle = -batch_pitch
+            if batch_roll > 0:
+                x_angle = -batch_roll
+
+            x_vector = abs(int(((x1 - x0) * (1 + (1 - math.cos(x_angle))))))
+            y_vector = abs(int(((y1 - y0) * (1 - math.sin(y_angle)))))
+            
+            vector = int((x_vector + y_vector))
             
             angles.append([batch_roll, batch_pitch, batch_yaw, vector])
         
@@ -117,35 +148,38 @@ class TCPServer():
 
                 center_x += self.sx
                 center_y += self.sy
-                
-                # scale_x = x_min/self.image_shape[1]
-                # center_x = self.x_filter.filter(center_x)
-                # print(center_x, )
 
-                x_scale = (angles[idx, 3]) / self.image_shape[1]
-                filter_x_scale = self.scale_filter.filter(x_scale)
+
+                current_x_angle = self.x_angle_filter.filter(angles[idx, 0])
+                current_y_angle = self.y_angle_filter.filter(angles[idx, 1])
+                current_z_angle = self.z_angle_filter.filter(angles[idx, 2])
+                current_scale = self.scale_filter.filter((angles[idx, 3]) / self.image_shape[1])
                 
-                angles[idx,0] = self.x_angle_filter.filter(angles[idx, 0])
-                angles[idx,1] = self.y_angle_filter.filter(angles[idx, 1])
-                angles[idx,2] = self.z_angle_filter.filter(angles[idx, 2])
+                current_scale = round(current_scale, 2)
                 
+                
+                center_x = self.x_trans_filter.filter(center_x)
+                center_y = self.y_trans_filter.filter(center_y)
                 if abs(self.prev_x[idx] - center_x) > 5:
                     self.prev_x[idx] = center_x
 
                 if abs(self.prev_y[idx] - center_y) > 5:
                     self.prev_y[idx] = center_y
-
-                # if abs(self.prev_angles[idx, 0] - angles[idx, 0]) >= 0.08:
-                self.prev_angles[idx, 0] = angles[idx, 0]
-
-                if abs(self.prev_angles[idx, 1] - angles[idx, 1]) >= 0.08:
-                    self.prev_angles[idx, 1] = angles[idx, 1]
                 
-                if abs(self.prev_angles[idx, 2] - angles[idx, 2]) >= 0.08:
-                    self.prev_angles[idx, 2] = angles[idx, 2]
 
-                if abs(self.prev_angles[idx, 3] - filter_x_scale) >= 0.03:
-                    self.prev_angles[idx, 3] = filter_x_scale
+
+                if abs(self.prev_angles[idx,0] - current_x_angle) >= 0.03:
+                    self.prev_angles[idx,0] = current_x_angle
+                if abs(self.prev_angles[idx,1] - current_y_angle) >= 0.03:
+                    self.prev_angles[idx,1] = current_y_angle
+
+                if abs(self.prev_angles[idx,2] - current_z_angle) >= 0.03:
+                    self.prev_angles[idx,2] = current_z_angle
+
+                if abs(self.prev_angles[idx,3] - current_scale) >= 0.02:
+                    self.prev_angles[idx,3] = current_scale
+
+                print(current_scale, self.prev_x[idx, 0], self.prev_y[idx, 0])
                 
                 center_x = str(self.prev_x[idx, 0]) + ','
                 center_y = str(self.prev_y[idx, 0]) + ','
@@ -156,8 +190,7 @@ class TCPServer():
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
-        # cv2.imshow('test', frame)
-        # cv2.waitKey(1)
+        
         return output
         
     async def loop_logic(self, websocket, path):

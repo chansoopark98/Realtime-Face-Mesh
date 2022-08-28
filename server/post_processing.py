@@ -85,8 +85,9 @@ def sparse(frame, results, color):
     for p in landmarks:
         cv2.circle(frame, tuple(p), 2, color, 0, cv2.LINE_AA)
         print(idx)
-        # cv2.imshow('test',frame)
-        # cv2.waitKey(0)
+        cv2.imshow('test',frame)
+        cv2.waitKey(0)
+        idx +=1
         
     draw_poly(frame, landmarks, color=color)
 

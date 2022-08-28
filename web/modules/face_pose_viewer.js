@@ -26,7 +26,7 @@ let z_rot = 0;
 // 검출된 Object 개수
 let targetLoop = 0;
 // 제한할 최대 Object 개수
-let maxObjNums = 2;
+let maxObjNums = 6;
 
 // 딥러닝 연산 처리를 위한 Websocket
 const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
