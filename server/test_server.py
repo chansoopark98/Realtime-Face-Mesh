@@ -11,7 +11,6 @@ import cv2
 import math
 from post_processing import rotationMatrixToEulerAngles
 from signal_filters import KalmanFilter1D, LowPassFilter
-import time
 
 class LowPassFilterMulti(object):
     def __init__(self, cut_off_freqency, ts, maximum_samples, shape):
@@ -44,8 +43,7 @@ class TCPServer():
         self.maximum_samples = 4
         self.prev_x = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_y = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
-        self.prev_area = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
-        self.prev_angles = np.zeros((self.maximum_samples, 4))
+        self.prev_scales = np.zeros((self.maximum_samples, 1))
         self.sx = 640 #480
         self.sy = 240
         self.image_shape = (960, 1280) # H,W
@@ -61,12 +59,12 @@ class TCPServer():
         self.color = (224, 255, 255)
 
     def rcv_data(self, data: str, filter_list: list):
-        start = time.process_time()
         
         xy_filter, angle_filter = filter_list
         # initailize
         output = ''
         angles = []
+        rotate_matrix = []
 
         base64_data = data[0]
         imgdata = base64.b64decode(base64_data)
@@ -79,8 +77,9 @@ class TCPServer():
         feed = frame.copy()
 
         for results in self.fa.get_landmarks(feed, boxes):
-            landmarks, params = results
+            _, params = results
             R = params[:3, :3].copy()
+            # print(params[:, 3:])
             angle = rotationMatrixToEulerAngles(R)
             
             batch_roll, batch_pitch, batch_yaw = angle
@@ -90,19 +89,15 @@ class TCPServer():
             batch_pitch = math.radians(batch_pitch)
             batch_yaw = math.radians(batch_yaw)
 
-            points = np.round(landmarks).astype(np.int)
+            # points = np.round(landmarks).astype(np.int)
             
-            x0, _ = tuple(points[1])
-            x1, _ = tuple(points[15])
-    
-            test_arr = np.array([abs(int(x1 - x0)), 1, 1])
-            R = np.absolute(R)
-            test_arr = test_arr @ R    
+            # x0, _ = tuple(points[1])
+            # x1, _ = tuple(points[15])
 
-            vector = np.add.reduce(test_arr)
+            angles.append([batch_roll, batch_pitch, batch_yaw])
+            rotate_matrix.append(R)
             
-            angles.append([batch_roll, batch_pitch, batch_yaw, vector])
-        
+
         angles = np.array(angles)
         
         # boxes (N, 4)
@@ -115,7 +110,7 @@ class TCPServer():
             boxes = boxes[:number_samples]
 
             # Calc angle and scale by LPF
-            zero_angle = np.zeros((self.maximum_samples, 4))
+            zero_angle = np.zeros((self.maximum_samples, 3))
             zero_box = np.zeros((self.maximum_samples, 4))
             
             for i in range(number_samples):
@@ -132,30 +127,46 @@ class TCPServer():
                 # x_min, y_min, x_max, y_max = xy_filtered[idx]
                 width = x_max - x_min
                 height = y_max - y_min
-                
-                center_x = int(x_min + (width / 2)) + self.sx
-                center_y = int(y_min + (height / 2)) + self.sy
 
+                rotate_matrix = np.absolute(rotate_matrix)
+                index_arr = np.array(rotate_matrix[idx])
                 
-                center_x = str(center_x) + ','
-                center_y = str(center_y) + ','
+                test_arr = np.array([width, height, 0.5])
+                test_scale = test_arr @ index_arr
+                vector = np.add.reduce(test_scale)
+                
+                cx = int(x_min + (width / 2)) + self.sx
+                cy = int(y_min + (height / 2)) + self.sy
+
+                if abs(self.prev_x[idx, 0] - cx) > 5:
+                    self.prev_x[idx, 0] = cx
+
+                if abs(self.prev_y[idx, 0] - cy) > 5:
+                    self.prev_y[idx, 0] = cy
+                
+                norm_scale = vector / self.image_shape[1]
+                
+                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.01:
+                    self.prev_scales[idx, 0] = norm_scale
+                
+                center_x = str(round(self.prev_x[idx, 0])) + ','
+                center_y = str(round(self.prev_y[idx, 0])) + ','
                 roll = str(angle_filtered[idx, 0]) + ','
                 pitch = str(angle_filtered[idx, 1]) + ','
                 yaw = str(angle_filtered[idx, 2]) + ','
-                scale = str(angle_filtered[idx, 3] / self.image_shape[1]) + ','
+                scale = str(round(self.prev_scales[idx, 0], 2)) + ','
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
 
-        duration = (time.process_time() - start)
-        print(duration)
+        
         return output
         
     async def loop_logic(self, websocket, path):
         print('init session')
         # scale_filter = LowPassFilterMulti(2., 1/10, self.maximum_samples, 1)
         xy_filter = LowPassFilterMulti(1., 1/10, self.maximum_samples, 4)
-        angle_filter = LowPassFilterMulti(1., 1/20, self.maximum_samples, 4)
+        angle_filter = LowPassFilterMulti(1., 1/20, self.maximum_samples, 3)
         # kalman_test = KalmanFilter1D()
         filter_lists = [xy_filter, angle_filter]
         while True:    
@@ -175,9 +186,9 @@ class TCPServer():
             self.ssl_context.load_cert_chain(certfile=self.cert_dir, keyfile=self.key_dir, password=self.password)
         self.start_server = websockets.serve(self.loop_logic,
                                             port=self.port, ssl=self.ssl_context,
-                                            max_size=400000,
-                                            max_queue=1,
-                                            read_limit=2**22,
+                                            max_size=262144,
+                                            max_queue=8,
+                                            read_limit=2**18,
                                             write_limit=2**8)
         asyncio.get_event_loop().run_until_complete(self.start_server)
         asyncio.get_event_loop().run_forever()
