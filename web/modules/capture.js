@@ -148,7 +148,7 @@ function getFrame(imgList, mode='normal') {
 
             imageCanvas.width = rw;
             imageCanvas.height = rh;
-            imageContext.scale(1.2, 1.2);
+            imageContext.scale(rw / img.width, rh / img.height);
             imageContext.drawImage(tmpCanvas, 0, 0, rw, rh, 0, 0, img.width, img.height);
             const imgData = imageContext.getImageData(0, 0, rw, rh);
 
