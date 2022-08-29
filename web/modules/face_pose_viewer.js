@@ -1,5 +1,6 @@
-import * as camera_util from "./camera.js";
-import { visibleHandler, updateRotationAndPosition} from "./face_pose_ar.js";
+import * as camera_util from './camera.js';
+import { visibleHandler, updateRotationAndPosition} from './face_pose_ar.js';
+import * as captureFunc from './capture.js'
 
 /*
     ----------------------<<< Global variable >>>----------------------
@@ -56,14 +57,6 @@ const videoElement = document.getElementById('video');
 videoElement.addEventListener('canplaythrough', render_video);
 console.log(videoElement.videoWidth, videoElement.videoHeight);
 
-
-// 페이지를 로드하면 실행 (구성요소들 초기화)
-function onLoad() {
-    console.log('on load')
-    // canvas.width = width;
-    // canvas.height = height;
-    camera_util.getCamera(videoElement);
-}
 
 webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시지 전송
     if (webSocket.readyState === webSocket.OPEN) {
@@ -129,4 +122,15 @@ async function render_video(){
     await requestAnimationFrame(render_video);
 }
 
-onLoad();
+// 페이지를 로드하면 실행 (구성요소들 초기화)
+window.onload = () => {
+    console.log('on load')
+    // canvas.width = width;
+    // canvas.height = height;
+    camera_util.getCamera(videoElement);
+
+    const renderAR = document.querySelector('#render_ar');
+    // const layer = [ canvas, renderAR ];
+    const layer = [ renderAR ];
+    captureFunc.createCaptureButton(videoElement, layer, sx, sy, dx, dy);
+}

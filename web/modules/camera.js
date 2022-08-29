@@ -1,14 +1,14 @@
 /**
  *  @author XHI-NM <jeong.chiseo@tsp-xr.com>
  *  @description
- *  Camera function for get rear camerea with general wide-angle
+ *  Camera function for getting rear camera with general wide-angle
  */
 
 let isIOS = null;
 let isMobile = null;
 
 function getLogTitle(text) {
-    let base = "======================================";
+    let base = '======================================';
     return (base + `\n${text}\n` +base);
 }
 
@@ -27,7 +27,7 @@ function getCameraSpecification() {
             for (let i = 0; i < deviceList.length; i++) {
                 const device = deviceList[i];
     
-                if (device.kind === "videoinput") {
+                if (device.kind === 'videoinput') {
                     const deviceId = device.deviceId;
                     console.log(deviceId);
                     const constraints = {
@@ -43,7 +43,7 @@ function getCameraSpecification() {
                     stream.getVideoTracks().forEach(track => {
                         const capabilities = track.getCapabilities();
     
-                        if (capabilities.facingMode[0] == "environment") {
+                        if (capabilities.facingMode[0] == 'environment') {
                             console.log(getLogTitle(device.label));
                             console.log(device);
                             console.log(capabilities);
@@ -68,7 +68,7 @@ function getCameraSpecification() {
             }
             resolve(cameraList);
         } else {
-            console.log("This device does not support web camera.");
+            console.log('This device does not support web camera.');
             reject(cameraList);
         }
     });
@@ -88,8 +88,8 @@ function openCamera(baseVideo, deviceId) {
         height: 1440
         }
     
-    //  if (deviceId == "ios") {
-    //      video.facingMode = "environment";
+    //  if (deviceId == 'ios') {
+    //      video.facingMode = 'environment';
         
     video.deviceId = deviceId;
         
@@ -108,35 +108,35 @@ function openCamera(baseVideo, deviceId) {
             });
             
             baseVideo.srcObject = stream;
-            baseVideo.addEventListener("loadedmetadata", () => {
+            baseVideo.addEventListener('loadedmetadata', () => {
                 baseVideo.play();
                 reserve(true, stream);
             });
-        }).catch("Open camera failed!");
+        }).catch('Open camera failed!');
     })
 }
 
 function getCamera(baseVideo) {
     const userAgent = getUserAgent();
 
-    if (userAgent.match("iphone") || userAgent.match("ipad") || userAgent.match("ipod") || userAgent.match("mac")) {
+    if (userAgent.match('iphone') || userAgent.match('ipad') || userAgent.match('ipod') || userAgent.match('mac')) {
         isIOS = true;
         isMobile = true;
-    //  if (!userAgent.match("safari") || userAgent.match("naver") || userAgent.match("twitter")) {
+    //  if (!userAgent.match('safari') || userAgent.match('naver') || userAgent.match('twitter')) {
     //      isIOS = false;
     //  }
     } else {
-        isMobile = userAgent.match("Android") || userAgent.match("mobile");
+        isMobile = userAgent.match('Android') || userAgent.match('mobile');
     }
 
     getCameraSpecification().then((cameraList) => {
-        let cameraId = "";
+        let cameraId = '';
 
         if (cameraList.length > 0) {
             cameraId = cameraList[0];
         }
         else if (isIOS) {
-            cameraId = "ios";
+            cameraId = 'ios';
         }
 
 
@@ -148,4 +148,4 @@ function getCamera(baseVideo) {
     });
 }
 
-export {getCameraSpecification, getCamera}
+export { getCameraSpecification, getCamera }
