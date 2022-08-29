@@ -16,6 +16,7 @@ import { RoomEnvironment } from './three.js/environments/RoomEnvironment.js';
 // Set global variable
 let camera_width = 2560; // 렌더링할 캔버스 너비
 let camera_height = 1440; // 렌더링할 캔버스 높이
+let baseModelPath = 'assets/objects/'; // 3d model path
 let modelLists = []; // 3d object models
 let pos = new THREE.Vector3(); // create once and reuse
 let vec = new THREE.Vector3(); // create once and reuse
@@ -62,188 +63,6 @@ camera.position.x = 0;
 camera.position.y = 0;
 camera.position.z = 10;
 
-// Load models
-// loader.load('assets/objects/head_01.glb', function ( gltf ) {
-//     gltf.scene.scale.set(45, 45, 45);			   
-//     gltf.scene.position.set(0, 0, 0);
-//     gltf.scene.visible = true;
-
-//     vec.set(
-//         ((1280 / camera_width) * 2 - 1).toFixed(2),
-//         (- (720 / camera_height) * 2 + 1).toFixed(2),
-//         0.5);
-    
-//     vec.unproject(camera);
-//     vec.sub(camera.position).normalize();
-    
-//     // var distance = - camera.position.z / vec.z;
-//     var distance = - camera.position.z / -1;
-
-//     var value = vec.multiplyScalar(distance.toFixed(2));
-    
-//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
-
-
-
-//     modelLists.push(gltf.scene);
-//     scene.add(gltf.scene);
-//     console.log('model load clear');
-
-// }, undefined, function ( error ) {
-// 	console.error( error );
-// } );
-
-// // Load models
-// loader.load('assets/objects/head_02.glb', function ( gltf ) {
-//     gltf.scene.scale.set(45, 45, 45);			   
-//     gltf.scene.position.set(0, 0, 0);
-//     gltf.scene.visible = true;
-
-//     vec.set(
-//         ((1280 / camera_width) * 2 - 1).toFixed(2),
-//         (- (720 / camera_height) * 2 + 1).toFixed(2),
-//         0.5);
-    
-//     vec.unproject(camera);
-//     vec.sub(camera.position).normalize();
-    
-//     // var distance = - camera.position.z / vec.z;
-//     var distance = - camera.position.z / -1;
-
-//     var value = vec.multiplyScalar(distance.toFixed(2));
-    
-//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
-
-//     modelLists.push(gltf.scene);
-//     scene.add(gltf.scene);
-//     console.log('model load clear');
-
-// }, undefined, function ( error ) {
-// 	console.error( error );
-// } );
-
-// // Load models
-// loader.load('assets/objects/head_03.glb', function ( gltf ) {
-//     gltf.scene.scale.set(45, 45, 45);			   
-//     gltf.scene.position.set(0, 0, 0);
-//     gltf.scene.visible = true;
-
-//     vec.set(
-//         ((1280 / camera_width) * 2 - 1).toFixed(2),
-//         (- (720 / camera_height) * 2 + 1).toFixed(2),
-//         0.5);
-    
-//     vec.unproject(camera);
-//     vec.sub(camera.position).normalize();
-    
-//     // var distance = - camera.position.z / vec.z;
-//     var distance = - camera.position.z / -1;
-
-//     var value = vec.multiplyScalar(distance.toFixed(2));
-    
-//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
-
-//     modelLists.push(gltf.scene);
-//     scene.add(gltf.scene);
-//     console.log('model load clear');
-
-// }, undefined, function ( error ) {
-// 	console.error( error );
-// } );
-
-// // Load models
-// loader.load('assets/objects/head_04.glb', function ( gltf ) {
-//     gltf.scene.scale.set(45, 45, 45);			   
-//     gltf.scene.position.set(0, 0, 0);
-//     gltf.scene.visible = true;
-
-//     vec.set(
-//         ((1280 / camera_width) * 2 - 1).toFixed(2),
-//         (- (720 / camera_height) * 2 + 1).toFixed(2),
-//         0.5);
-    
-//     vec.unproject(camera);
-//     vec.sub(camera.position).normalize();
-    
-//     // var distance = - camera.position.z / vec.z;
-//     var distance = - camera.position.z / -1;
-
-//     var value = vec.multiplyScalar(distance.toFixed(2));
-    
-//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
-
-//     modelLists.push(gltf.scene);
-//     scene.add(gltf.scene);
-//     console.log('model load clear');
-
-// }, undefined, function ( error ) {
-// 	console.error( error );
-// } );
-
-// // Load models
-// loader.load('assets/objects/head_05.glb', function ( gltf ) {
-//     gltf.scene.scale.set(45, 45, 45);			   
-//     gltf.scene.position.set(0, 0, 0);
-//     gltf.scene.visible = true;
-
-//     vec.set(
-//         ((1280 / camera_width) * 2 - 1).toFixed(2),
-//         (- (720 / camera_height) * 2 + 1).toFixed(2),
-//         0.5);
-    
-//     vec.unproject(camera);
-//     vec.sub(camera.position).normalize();
-    
-//     // var distance = - camera.position.z / vec.z;
-//     var distance = - camera.position.z / -1;
-
-//     var value = vec.multiplyScalar(distance.toFixed(2));
-    
-//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
-
-//     modelLists.push(gltf.scene);
-//     scene.add(gltf.scene);
-//     console.log('model load clear');
-
-// }, undefined, function ( error ) {
-// 	console.error( error );
-// } );
-
-// // Load models
-// loader.load('assets/objects/head_06.glb', function ( gltf ) {
-//     gltf.scene.scale.set(45, 45, 45);			   
-//     gltf.scene.position.set(0, 0, 0);
-//     gltf.scene.visible = true;
-
-//     vec.set(
-//         ((1280 / camera_width) * 2 - 1).toFixed(2),
-//         (- (720 / camera_height) * 2 + 1).toFixed(2),
-//         0.5);
-    
-//     vec.unproject(camera);
-//     vec.sub(camera.position).normalize();
-    
-//     // var distance = - camera.position.z / vec.z;
-//     var distance = - camera.position.z / -1;
-
-//     var value = vec.multiplyScalar(distance.toFixed(2));
-    
-//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
-
-//     modelLists.push(gltf.scene);
-//     scene.add(gltf.scene);
-//     console.log('model load clear');
-
-// }, undefined, function ( error ) {
-// 	console.error( error );
-// } );
-
 function load3DObj(modelPath){
     // Load models
     loader.load(modelPath, function ( gltf ) {
@@ -275,7 +94,6 @@ function load3DObj(modelPath){
 }
 
 for (let modelIdx=1; modelIdx<=6; modelIdx++){
-    let baseModelPath = 'assets/objects/';
     let modelObjectName = baseModelPath + 'head_0' + String(modelIdx) + '.glb';
     console.log(modelObjectName);
     load3DObj(modelObjectName)
@@ -296,7 +114,7 @@ function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot,
     
     center_y = center_y - 30;
 
-    scale = (170 * scale).toFixed(0);
+    scale = (200 * scale).toFixed(0);
 
     modelLists[idx].scale.set(scale, scale, scale)
 
