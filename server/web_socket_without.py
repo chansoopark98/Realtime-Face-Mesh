@@ -9,38 +9,9 @@ import base64
 import service
 import cv2
 import math
-
-from post_processing import pose, sparse, rotationMatrixToEulerAngles
-
-class LowPassFilter(object):
-    def __init__(self, cut_off_freqency, ts):
-        self.ts = ts
-        self.cut_off_freqency = cut_off_freqency
-        self.tau = self.get_tau()
-
-        self.prev_data = 0.
-        
-    def get_tau(self):
-        return 1 / (2 * np.pi * self.cut_off_freqency)
-
-    def filter(self, data):
-        val = (self.ts * data + self.tau * self.prev_data) / (self.tau + self.ts)
-        self.prev_data = val
-        return val
-
-
-# class LowPassFilter(object):
-#     def __init__(self, alpha):
-#         self.prevX = 0
-#         self.alpha = alpha
-    
-#     def filter(self, x):
-#         # low pass filter 
-#         x_lpf = self.alpha * self.prevX + (1 - self.alpha)*x
-#         # 이전 스텝 값 갱신
-#         self.prevX = x_lpf
-#         return x_lpf  
-
+from post_processing import rotationMatrixToEulerAngles
+from signal_filters import KalmanFilter1D, LowPassFilter
+import time
 
 class TCPServer():
     def __init__(self, hostname, port, cert_dir, key_dir, password):
@@ -51,37 +22,28 @@ class TCPServer():
         self.key_dir = key_dir
         self.password = password
         
-        self.maximum_samples = 2
+        self.maximum_samples = 4
         self.prev_x = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_y = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_area = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_angles = np.zeros((self.maximum_samples, 4))
-        self.sx = 640
+        self.sx = 640 #480
         self.sy = 240
         self.image_shape = (960, 1280) # H,W
         
-        self.scale_filter = LowPassFilter(1/5., 1/20)
-        self.x_trans_filter = LowPassFilter(1., 1/20)
-        self.y_trans_filter = LowPassFilter(1., 1/20)
-        self.x_angle_filter = LowPassFilter(1., 1/20)
-        self.y_angle_filter = LowPassFilter(1., 1/20)
-        self.z_angle_filter = LowPassFilter(1., 1/20)
-        # self.scale_filter =   LowPassFilter(0.8)
-        # self.x_trans_filter = LowPassFilter(0.8)
-        # self.y_trans_filter = LowPassFilter(0.8)
-        # self.x_angle_filter = LowPassFilter(0.8)
-        # self.y_angle_filter = LowPassFilter(0.8)
-        # self.z_angle_filter = LowPassFilter(0.8)
         self.load_model()
     
     def load_model(self):
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                        conf_threshold=0.9, nms_iou_threshold=0.5)
+                                        conf_threshold=0.9, nms_iou_threshold=0.5,
+                                        nms_max_output_size=200)
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
         self.handler = getattr(service, 'pose')
         self.color = (224, 255, 255)
 
-    def rcv_data(self, data):
+    def rcv_data(self, data: str, filter_list: list):
+        scale_filter, x_angle_filter, y_angle_filter,\
+                                z_angle_filter, kalman_test= filter_list
         # initailize
         output = ''
         angles = []
@@ -97,12 +59,10 @@ class TCPServer():
         feed = frame.copy()
 
         for results in self.fa.get_landmarks(feed, boxes):
-            # sparse(frame, results, (0, 0, 0))
-            # pose(frame, results, (127, 0, 255))
             landmarks, params = results
             R = params[:3, :3].copy()
             angle = rotationMatrixToEulerAngles(R)
-
+            
             batch_roll, batch_pitch, batch_yaw = angle
 
             # Degree to Radians
@@ -112,22 +72,14 @@ class TCPServer():
 
             points = np.round(landmarks).astype(np.int)
             
-            x0, y0 = tuple(points[1])
-            x1, y1 = tuple(points[15])
-            
+            x0, _ = tuple(points[1])
+            x1, _ = tuple(points[15])
+    
+            test_arr = np.array([abs(int(x1 - x0)), 1, 1])
+            R = np.absolute(R)
+            test_arr = test_arr @ R    
 
-            x_angle = batch_roll
-            y_angle = batch_pitch
-
-            if batch_pitch > 0:
-                y_angle = -batch_pitch
-            if batch_roll > 0:
-                x_angle = -batch_roll
-
-            x_vector = abs(int(((x1 - x0) * (1 + (1 - math.cos(x_angle))))))
-            y_vector = abs(int(((y1 - y0) * (1 - math.sin(y_angle)))))
-            
-            vector = int((x_vector + y_vector))
+            vector = np.add.reduce(test_arr)
             
             angles.append([batch_roll, batch_pitch, batch_yaw, vector])
         
@@ -146,30 +98,28 @@ class TCPServer():
                 width = x_max - x_min
                 height = y_max - y_min
                 
-                center_x = int(x_min + (width / 2)) 
-                center_y = int(y_min + (height / 2))
+                center_x = int(x_min + (width / 2)) + self.sx
+                center_y = int(y_min + (height / 2)) + self.sy
 
-                center_x += self.sx
-                center_y += self.sy
-
-
-                current_x_angle = self.x_angle_filter.filter(angles[idx, 0])
-                current_y_angle = self.y_angle_filter.filter(angles[idx, 1])
-                current_z_angle = self.z_angle_filter.filter(angles[idx, 2])
-                current_scale = self.scale_filter.filter((angles[idx, 3]) / self.image_shape[1])
-                
-                current_scale = round(current_scale, 2)
+                current_x_angle = x_angle_filter.filter(angles[idx, 0])
+                current_y_angle = y_angle_filter.filter(angles[idx, 1])
+                current_z_angle = z_angle_filter.filter(angles[idx, 2])
+                current_scale = scale_filter.filter((angles[idx, 3]) / self.image_shape[1])
                 
                 
-                center_x = self.x_trans_filter.filter(center_x)
-                center_y = self.y_trans_filter.filter(center_y)
-                if abs(self.prev_x[idx] - center_x) > 5:
+                # center_x = self.x_trans_filter.filter(center_x)
+                # center_y = self.y_trans_filter.filter(center_y)
+
+                # print([0])
+                # kalman_results = self.kalman_test.KalmanTracking(center_x, center_y)
+                # center_x = kalman_results[0]
+                # center_y = kalman_results[2]
+
+                if abs(self.prev_x[idx] - center_x) > 2:
                     self.prev_x[idx] = center_x
 
-                if abs(self.prev_y[idx] - center_y) > 5:
+                if abs(self.prev_y[idx] - center_y) > 2:
                     self.prev_y[idx] = center_y
-                
-
 
                 if abs(self.prev_angles[idx,0] - current_x_angle) >= 0.03:
                     self.prev_angles[idx,0] = current_x_angle
@@ -179,10 +129,10 @@ class TCPServer():
                 if abs(self.prev_angles[idx,2] - current_z_angle) >= 0.03:
                     self.prev_angles[idx,2] = current_z_angle
 
-                if abs(self.prev_angles[idx,3] - current_scale) >= 0.02:
+                current_scale = round(current_scale, 3)
+                if abs(self.prev_angles[idx,3] - current_scale) >= 0.025:
                     self.prev_angles[idx,3] = current_scale
 
-                print(current_scale, self.prev_x[idx, 0], self.prev_y[idx, 0])
                 
                 center_x = str(self.prev_x[idx, 0]) + ','
                 center_y = str(self.prev_y[idx, 0]) + ','
@@ -197,10 +147,22 @@ class TCPServer():
         return output
         
     async def loop_logic(self, websocket, path):
+        scale_filter = LowPassFilter(2., 1/10)
+        x_angle_filter = LowPassFilter(1., 1/20)
+        y_angle_filter = LowPassFilter(1., 1/20)
+        z_angle_filter = LowPassFilter(1., 1/20)
+        kalman_test = KalmanFilter1D()
+
+        filter_list = [scale_filter,
+                       x_angle_filter,
+                       y_angle_filter,
+                       z_angle_filter,
+                       kalman_test]
         while True:    
             # Wait data from client
+            
             data = await asyncio.gather(websocket.recv())
-            rcv_data = self.rcv_data(data=data)
+            rcv_data = self.rcv_data(data=data, filter_list=filter_list)
             if rcv_data != '':
                 rcv_data = rcv_data[:-1]
             await websocket.send(rcv_data)

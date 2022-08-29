@@ -6,13 +6,13 @@ import * as captureFunc from './capture.js'
     ----------------------<<< Global variable >>>----------------------
 */
 // Crop할 VideoElement의 시작 x축 위치 (xmin)
-let sx = 640;
+let sx = 480;
 // Crop할 VideoElement의 시작 y축 위치 (ymin)
-let sy = 240;
+let sy = 120;
 // Crop할 영역의 너비 (width)
-let dx = 1280;
+let dx = 1600;
 // Crop할 영역의 높이 (height)
-let dy = 960;
+let dy = 1200;
 
 /* Object 위치 update에 사용 할 전역 변수 리스트 */
 // Object의 Box 중심 x,y
@@ -30,9 +30,9 @@ let targetLoop = 0;
 let maxObjNums = 6;
 
 // 딥러닝 연산 처리를 위한 Websocket
-// const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
+const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
 // const webSocket = new WebSocket('ws://127.0.0.1:7777');
-const webSocket = new WebSocket('wss://127.0.0.1:5502')
+// const webSocket = new WebSocket('wss://127.0.0.1:5502');
 
 // 효과 및 다양한 이펙트를 표현하기 위한 canvas
 const canvas = document.getElementById('render_area');
@@ -45,10 +45,8 @@ context.strokeRect(sx, sy, dx, dy);
 
 // Video frame을 Websocket으로 전송하기 위한 이미지 전송용 canvas
 const sendCanvas = document.getElementById('send_canvas');
-sendCanvas.width = dx;
-sendCanvas.height = dy;
-
-
+sendCanvas.width = 1280;
+sendCanvas.height = 960;
 
 let sendContext = sendCanvas.getContext('2d');
                 
@@ -61,14 +59,13 @@ console.log(videoElement.videoWidth, videoElement.videoHeight);
 webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시지 전송
     if (webSocket.readyState === webSocket.OPEN) {
         
-        let sendData = sendCanvas.toDataURL('image/jpeg', 0.7)
+        let sendData = sendCanvas.toDataURL('image/jpeg', 0.5)
         webSocket.send(sendData.split(",")[1]);
         
     }
 }, 30);
 
 webSocket.onmessage = function(message){  
-
     let recvData = message.data.split(',');
     
     if (recvData.length >=6){
@@ -103,8 +100,7 @@ webSocket.onmessage = function(message){
 
     
 
-    for (let deleteIdx=maxObjNums; deleteIdx>targetLoop; deleteIdx--){
-        
+    for (let deleteIdx=6; deleteIdx>targetLoop; deleteIdx--){
         visibleHandler(deleteIdx-1, false);
         
     }
@@ -117,7 +113,8 @@ async function render_video(){
     // context.drawImage(videoElement, 0, 0, 1920, 1080);
     
     // sendContext.drawImage(videoElement, 640, 180, 1920, 1080, 0, 0, 1920, 1080);
-    sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, dx, dy);
+    // sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, dx, dy);
+    sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1280, 960);
 
     await requestAnimationFrame(render_video);
 }
