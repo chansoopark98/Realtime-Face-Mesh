@@ -1,11 +1,13 @@
-/*
-  2022 Kintex Face pose detection demo
-*/
-// Import modules
-import { GLTFLoader } from '../gltf/examples/jsm/loaders/GLTFLoader.js';
-import { RoomEnvironment } from '../gltf/examples/jsm/environments/RoomEnvironment.js';
-import * as THREE from '../build/three.module.js'
+/**
+ *  @author chansoopark98 <park.chansoo@tsp-xr.com>
+ *  @description
+ *  2022 Kintex Face pose detection demo
+ */
 
+// Import modules
+import * as THREE from './three.js/three.module.js'
+import { GLTFLoader } from './three.js/loaders/GLTFLoader.js';
+import { RoomEnvironment } from './three.js/environments/RoomEnvironment.js';
 
 /*
     ----------------------<<< Global variable >>>----------------------

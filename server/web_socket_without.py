@@ -1,4 +1,6 @@
 import ssl
+import os
+import argparse
 import asyncio
 import websockets
 import cv2
@@ -41,12 +43,13 @@ class LowPassFilter(object):
 
 
 class TCPServer():
-    def __init__(self, hostname, port, cert_dir, key_dir):
+    def __init__(self, hostname, port, cert_dir, key_dir, password):
         super().__init__()
         self.hostname = hostname
         self.port = port
         self.cert_dir = cert_dir
         self.key_dir = key_dir
+        self.password = password
         
         self.maximum_samples = 2
         self.prev_x = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
@@ -88,7 +91,7 @@ class TCPServer():
         frame = np.frombuffer(imgdata, np.uint8)
         frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
 
-         # face detection
+        # face detection
         boxes, _ = self.fd.inference(frame) # boxes, scores
 
         feed = frame.copy()
@@ -203,32 +206,58 @@ class TCPServer():
             await websocket.send(rcv_data)
 
     def run_server(self):
-        if use_local:
+        if USE_LOCAL:
             self.ssl_context = None
         else:
             self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            self.ssl_context.load_cert_chain(self.cert_dir, self.key_dir)
+            self.ssl_context.load_cert_chain(certfile=self.cert_dir, keyfile=self.key_dir, password=self.password)
         self.start_server = websockets.serve(self.loop_logic,
-                                             port=self.port, ssl=self.ssl_context,
-                                             max_size=400000,
-                                             max_queue=1,
-                                             read_limit=2**22,
-                                             write_limit=2**8)
+                                            port=self.port, ssl=self.ssl_context,
+                                            max_size=400000,
+                                            max_queue=1,
+                                            read_limit=2**22,
+                                            write_limit=2**8)
         asyncio.get_event_loop().run_until_complete(self.start_server)
         asyncio.get_event_loop().run_forever()
         
 if __name__ == "__main__":
-    use_local = False
+    USE_LOCAL = False
+    
+    parser = argparse.ArgumentParser(description="Face Detection Server")
+    parser.add_argument('--ssl_path', '-sp',
+                                                type=str,
+                                                help='SSL File Path [default : ../]',
+                                                default='../')
+    parser.add_argument('--port', '-p',
+                                                type=int,
+                                                help='SSL Port [default : 7777]',
+                                                default=7777)
+    parser.add_argument('--password', '-pw',
+                                                type=str,
+                                                help='SSL Password [default : None]',
+                                                default=None)
+    parser.add_argument('--use_local', '-ul',
+                                                type=bool,
+                                                help='Launch Server Local Setting (127.0.0.1) [default : False]',
+                                                default=False)
+    
+    args = parser.parse_args()
+    
+    cert = os.path.join(args.ssl_path, 'cert.pem')
+    key = os.path.join(args.ssl_path, 'privkey.pem')
 
-    if use_local:
+    USE_LOCAL = args.use_local
+
+    if USE_LOCAL:
         hostname = '127.0.0.1'
     else:
         hostname = '0.0.0.0'
 
     server = TCPServer(
         hostname = hostname,
-        port = 7777,
-        cert_dir = '../cert.pem',
-        key_dir = '../privkey.pem'
+        port = args.port,
+        cert_dir = cert,
+        key_dir = key,
+        password = args.password
     )
     server.run_server()
