@@ -124,13 +124,16 @@ function randomModelSelector(){
 
 // scene에 있는 모델을 초기화한 뒤, 랜덤 모델을 선택한 뒤 scene에 추가합니다.
 function randomModelInitialize(){
+    console.log('start randomModelInitialize');
     // scene에 있는 모델 초기화
     scene.remove(chooseModelList[0]);
     scene.remove(chooseModelList[1]);
     scene.remove(chooseModelList[2]);
     scene.remove(chooseModelList[3]);
-    
+    // random으로 선택된 모델 초기화
+    chooseModelList = [];
     // 랜덤 모델 선택
+
     randomModelSelector();
     // 선택된 랜덤 모델 scene에 추가
     for (let chooseIdx=0; chooseIdx<=3; chooseIdx++){

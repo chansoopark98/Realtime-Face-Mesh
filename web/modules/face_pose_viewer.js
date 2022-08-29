@@ -63,7 +63,7 @@ console.log(videoElement.videoWidth, videoElement.videoHeight);
 webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시지 전송
     if (webSocket.readyState === webSocket.OPEN) {
         
-        let sendData = sendCanvas.toDataURL('image/jpeg', 0.5)
+        let sendData = sendCanvas.toDataURL('image/jpeg', 0.7)
         webSocket.send(sendData.split(",")[1]);
         
     }
