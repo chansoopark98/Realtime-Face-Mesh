@@ -35,22 +35,24 @@ function getFrameInfo() {
 
 function downloadImage(imageURL, imageName=null) {
     let dataURL = imageURL.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
-    dataURL = dataURL.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Capture.jpg');
+    dataURL = dataURL.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Capture.png');
     
     const link = document.createElement('a');
 
     if (imageName) {
         link.download = str(imageName);
     } else {
-        link.download = `${getCurrentDate()}.jpg`;
+        link.download = `${getCurrentDate()}.png`;
     }
     link.href = dataURL;
     link.click();
 }
 
 function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
-    const width = videoElement.videoWidth;
-    const height = videoElement.videoHeight;
+    // const width = videoElement.videoWidth;
+    // const height = videoElement.videoHeight;
+    const width = 2560;
+    const height = 1440;
 
     if (cw === 0 || ch === 0) {
         cw = width;
@@ -63,7 +65,7 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
     try {
         captureContext.drawImage(videoElement, 0, 0, width, height);
 
-        layerList.forEach(layer => {
+        layerList.forEach((layer) => {
             captureContext.drawImage(layer, 0, 0, layer.width, layer.height);
         });
     
@@ -72,7 +74,7 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
         captureCanvas.width = cw;
         captureCanvas.height = ch;
         captureContext.putImageData(imgData, 0, 0);
-        const imgBase64 = captureCanvas.toDataURL('image/jpeg', 1.0);
+        const imgBase64 = captureCanvas.toDataURL('image/png', 1.0);
     
         return {
             'data': imgData,
@@ -109,7 +111,7 @@ function createCaptureButton(videoElement,
     captureButton.addEventListener('click', (event) => {
         const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
         getFrame([ capturedImage ]);
-        downloadImage(capturedImage.imgURL);
+        //downloadImage(capturedImage.imgURL);
     });
 }
 
@@ -148,15 +150,12 @@ function getFrame(imgList, mode='normal') {
 
             imageCanvas.width = rw;
             imageCanvas.height = rh;
-            imageContext.scale(rw / img.width, rh / img.height);
-            imageContext.drawImage(tmpCanvas, 0, 0, rw, rh, 0, 0, img.width, img.height);
+            imageContext.drawImage(tmpCanvas, 0, 0, img.width, img.height, 0, 0, rw, rh);
             const imgData = imageContext.getImageData(0, 0, rw, rh);
-
-            downloadImage(imageCanvas.toDataURL('image/jpeg', 1.0));
 
             createImageBitmap(imgData).then((imgBitmap) => {
                 frameContext.drawImage(imgBitmap, ox, oy, rw, rh);
-                const imgBase64 = frameCanvas.toDataURL('image/jpeg', 1.0);
+                const imgBase64 = frameCanvas.toDataURL('image/png', 1.0);
                 downloadImage(imgBase64);
             })
         });
