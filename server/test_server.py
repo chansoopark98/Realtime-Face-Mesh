@@ -13,6 +13,25 @@ from post_processing import rotationMatrixToEulerAngles
 from signal_filters import KalmanFilter1D, LowPassFilter
 import time
 
+class LowPassFilterMulti(object):
+    def __init__(self, cut_off_freqency, ts, maximum_samples, shape):
+        self.ts = ts
+        self.cut_off_freqency = cut_off_freqency
+        self.maximum_samples = maximum_samples
+        self.shape = shape
+        self.tau = self.get_tau()
+
+        self.prev_data = np.zeros((self.maximum_samples, self.shape))
+        
+    def get_tau(self):
+        return 1 / (2 * np.pi * self.cut_off_freqency)
+
+    def filter(self, data):
+        val = (self.ts * data + self.tau * self.prev_data) / (self.tau + self.ts)
+        self.prev_data = val
+        return val
+
+
 class TCPServer():
     def __init__(self, hostname, port, cert_dir, key_dir, password):
         super().__init__()
@@ -43,8 +62,8 @@ class TCPServer():
 
     def rcv_data(self, data: str, filter_list: list):
         start = time.process_time()
-        scale_filter, x_angle_filter, y_angle_filter,\
-                                z_angle_filter= filter_list
+        
+        xy_filter, angle_filter = filter_list
         # initailize
         output = ''
         angles = []
@@ -90,57 +109,40 @@ class TCPServer():
         number_samples = angles.shape[0]
 
         if number_samples >= 1:
-
             if number_samples > self.maximum_samples:
                 number_samples = self.maximum_samples
+            
+            boxes = boxes[:number_samples]
+
+            # Calc angle and scale by LPF
+            zero_angle = np.zeros((self.maximum_samples, 4))
+            zero_box = np.zeros((self.maximum_samples, 4))
+            
+            for i in range(number_samples):
+                zero_angle[i] = angles[i]
+                zero_box[i] = boxes[i]
+
+            angle_filtered = angle_filter.filter(zero_angle)
+            # xy_filtered = xy_filter.filter(zero_box)
+            
+            angle_filtered = np.round(angle_filtered, 2)
 
             for idx in range(number_samples):
                 x_min, y_min, x_max, y_max = boxes[idx]
+                # x_min, y_min, x_max, y_max = xy_filtered[idx]
                 width = x_max - x_min
                 height = y_max - y_min
                 
                 center_x = int(x_min + (width / 2)) + self.sx
                 center_y = int(y_min + (height / 2)) + self.sy
 
-                current_x_angle = x_angle_filter.filter(angles[idx, 0])
-                current_y_angle = y_angle_filter.filter(angles[idx, 1])
-                current_z_angle = z_angle_filter.filter(angles[idx, 2])
-                current_scale = scale_filter.filter((angles[idx, 3]) / self.image_shape[1])
                 
-                
-                # center_x = self.x_trans_filter.filter(center_x)
-                # center_y = self.y_trans_filter.filter(center_y)
-
-                # print([0])
-                # kalman_results = self.kalman_test.KalmanTracking(center_x, center_y)
-                # center_x = kalman_results[0]
-                # center_y = kalman_results[2]
-
-                if abs(self.prev_x[idx] - center_x) > 2:
-                    self.prev_x[idx] = center_x
-
-                if abs(self.prev_y[idx] - center_y) > 2:
-                    self.prev_y[idx] = center_y
-
-                if abs(self.prev_angles[idx,0] - current_x_angle) >= 0.03:
-                    self.prev_angles[idx,0] = current_x_angle
-                if abs(self.prev_angles[idx,1] - current_y_angle) >= 0.03:
-                    self.prev_angles[idx,1] = current_y_angle
-
-                if abs(self.prev_angles[idx,2] - current_z_angle) >= 0.03:
-                    self.prev_angles[idx,2] = current_z_angle
-
-                current_scale = round(current_scale, 3)
-                if abs(self.prev_angles[idx,3] - current_scale) >= 0.025:
-                    self.prev_angles[idx,3] = current_scale
-
-                
-                center_x = str(self.prev_x[idx, 0]) + ','
-                center_y = str(self.prev_y[idx, 0]) + ','
-                scale = str(round(self.prev_angles[idx, 3], 2)) + ','
-                roll = str(round(self.prev_angles[idx, 0], 2)) + ','
-                pitch = str(round(self.prev_angles[idx, 1], 2)) + ','
-                yaw = str(round(self.prev_angles[idx, 2], 2)) + ','
+                center_x = str(center_x) + ','
+                center_y = str(center_y) + ','
+                roll = str(angle_filtered[idx, 0]) + ','
+                pitch = str(angle_filtered[idx, 1]) + ','
+                yaw = str(angle_filtered[idx, 2]) + ','
+                scale = str(angle_filtered[idx, 3] / self.image_shape[1]) + ','
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
@@ -151,21 +153,16 @@ class TCPServer():
         
     async def loop_logic(self, websocket, path):
         print('init session')
-        scale_filter = LowPassFilter(2., 1/10)
-        x_angle_filter = LowPassFilter(1., 1/20)
-        y_angle_filter = LowPassFilter(1., 1/20)
-        z_angle_filter = LowPassFilter(1., 1/20)
+        # scale_filter = LowPassFilterMulti(2., 1/10, self.maximum_samples, 1)
+        xy_filter = LowPassFilterMulti(1., 1/10, self.maximum_samples, 4)
+        angle_filter = LowPassFilterMulti(1., 1/20, self.maximum_samples, 4)
         # kalman_test = KalmanFilter1D()
-
-        filter_list = [scale_filter,
-                       x_angle_filter,
-                       y_angle_filter,
-                       z_angle_filter]
+        filter_lists = [xy_filter, angle_filter]
         while True:    
             # Wait data from client
             
             data = await asyncio.gather(websocket.recv())
-            rcv_data = self.rcv_data(data=data, filter_list=filter_list)
+            rcv_data = self.rcv_data(data=data, filter_list=filter_lists)
             if rcv_data != '':
                 rcv_data = rcv_data[:-1]
             await websocket.send(rcv_data)
