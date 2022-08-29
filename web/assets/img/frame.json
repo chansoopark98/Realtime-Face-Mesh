@@ -1,0 +1,26 @@
+{
+    "frameImg" : {
+        "normal" : {
+            "imgSrc" : "./assets/img/normal_frame.png",
+            "imgWidth" : 1830,
+            "imgHeight" : 1830,
+            "idx" : {
+                "0" : {
+                    "offsetX" : 72,
+                    "offsetY" : 76
+                }
+            }
+        },
+        "coffee" : {
+            "imgSrc" : "./assets/img/coffet_frame.png",
+            "imgWidth" : 1830,
+            "imgHeight" : 1830,
+            "idx" : {
+                "0" : {
+                    "offsetX" : 72,
+                    "offsetY" : 76
+                }
+            }
+        }
+    }
+}
