@@ -213,7 +213,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_local', '-ul',
                                                 type=bool,
                                                 help='Launch Server Local Setting (127.0.0.1) [default : False]',
-                                                default=True)
+                                                default=False)
     
     args = parser.parse_args()
     
