@@ -7,9 +7,7 @@ import base64
 import service
 import cv2
 import math
-import time
-
-from post_processing import pose, sparse, rotationMatrixToEulerAngles
+from post_processing import rotationMatrixToEulerAngles
 
 class LowPassFilter(object):
     def __init__(self, cut_off_freqency, ts):
@@ -26,20 +24,6 @@ class LowPassFilter(object):
         val = (self.ts * data + self.tau * self.prev_data) / (self.tau + self.ts)
         self.prev_data = val
         return val
-
-
-# class LowPassFilter(object):
-#     def __init__(self, alpha):
-#         self.prevX = 0
-#         self.alpha = alpha
-    
-#     def filter(self, x):
-#         # low pass filter 
-#         x_lpf = self.alpha * self.prevX + (1 - self.alpha)*x
-#         # 이전 스텝 값 갱신
-#         self.prevX = x_lpf
-#         return x_lpf  
-
 
 class TCPServer():
     def __init__(self, hostname, port, cert_dir, key_dir):
@@ -64,12 +48,6 @@ class TCPServer():
         self.x_angle_filter = LowPassFilter(1., 1/20)
         self.y_angle_filter = LowPassFilter(1., 1/20)
         self.z_angle_filter = LowPassFilter(1., 1/20)
-        # self.scale_filter =   LowPassFilter(0.8)
-        # self.x_trans_filter = LowPassFilter(0.8)
-        # self.y_trans_filter = LowPassFilter(0.8)
-        # self.x_angle_filter = LowPassFilter(0.8)
-        # self.y_angle_filter = LowPassFilter(0.8)
-        # self.z_angle_filter = LowPassFilter(0.8)
         self.load_model()
     
     def load_model(self):
@@ -145,8 +123,11 @@ class TCPServer():
                 current_z_angle = self.z_angle_filter.filter(angles[idx, 2])
                 current_scale = self.scale_filter.filter((angles[idx, 3]) / self.image_shape[1])
                 
+                # center_x = gaussian_filter(center_x, 2)
                 center_x = self.x_trans_filter.filter(center_x)
+                # print(center_x)
                 center_y = self.y_trans_filter.filter(center_y)
+                # center_y = gaussian_filter(center_y, 2)
 
                 if abs(self.prev_x[idx] - center_x) > 5:
                     self.prev_x[idx] = center_x
@@ -163,10 +144,10 @@ class TCPServer():
                 if abs(self.prev_angles[idx,2] - current_z_angle) >= 0.03:
                     self.prev_angles[idx,2] = current_z_angle
 
-                if abs(self.prev_angles[idx,3] - current_scale) >= 0.02:
+                current_scale = round(current_scale, 3)
+                if abs(self.prev_angles[idx,3] - current_scale) >= 0.025:
                     self.prev_angles[idx,3] = current_scale
 
-                # print(current_scale, self.prev_x[idx, 0], self.prev_y[idx, 0])
                 
                 center_x = str(self.prev_x[idx, 0]) + ','
                 center_y = str(self.prev_y[idx, 0]) + ','

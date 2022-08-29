@@ -61,187 +61,223 @@ camera.position.y = 0;
 camera.position.z = 10;
 
 // Load models
-loader.load('assets/objects/head_01.glb', function ( gltf ) {
-    gltf.scene.scale.set(45, 45, 45);			   
-    gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible = true;
+// loader.load('assets/objects/head_01.glb', function ( gltf ) {
+//     gltf.scene.scale.set(45, 45, 45);			   
+//     gltf.scene.position.set(0, 0, 0);
+//     gltf.scene.visible = true;
 
-    vec.set(
-        ((1280 / camera_width) * 2 - 1).toFixed(2),
-        (- (720 / camera_height) * 2 + 1).toFixed(2),
-        0.5);
+//     vec.set(
+//         ((1280 / camera_width) * 2 - 1).toFixed(2),
+//         (- (720 / camera_height) * 2 + 1).toFixed(2),
+//         0.5);
     
-    vec.unproject(camera);
-    vec.sub(camera.position).normalize();
+//     vec.unproject(camera);
+//     vec.sub(camera.position).normalize();
     
-    // var distance = - camera.position.z / vec.z;
-    var distance = - camera.position.z / -1;
+//     // var distance = - camera.position.z / vec.z;
+//     var distance = - camera.position.z / -1;
 
-    var value = vec.multiplyScalar(distance.toFixed(2));
+//     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
 
 
-    modelLists.push(gltf.scene);
-    scene.add(gltf.scene);
-    console.log('model load clear');
+//     modelLists.push(gltf.scene);
+//     scene.add(gltf.scene);
+//     console.log('model load clear');
 
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+// }, undefined, function ( error ) {
+// 	console.error( error );
+// } );
 
-// Load models
-loader.load('assets/objects/head_02.glb', function ( gltf ) {
-    gltf.scene.scale.set(45, 45, 45);			   
-    gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible = true;
+// // Load models
+// loader.load('assets/objects/head_02.glb', function ( gltf ) {
+//     gltf.scene.scale.set(45, 45, 45);			   
+//     gltf.scene.position.set(0, 0, 0);
+//     gltf.scene.visible = true;
 
-    vec.set(
-        ((1280 / camera_width) * 2 - 1).toFixed(2),
-        (- (720 / camera_height) * 2 + 1).toFixed(2),
-        0.5);
+//     vec.set(
+//         ((1280 / camera_width) * 2 - 1).toFixed(2),
+//         (- (720 / camera_height) * 2 + 1).toFixed(2),
+//         0.5);
     
-    vec.unproject(camera);
-    vec.sub(camera.position).normalize();
+//     vec.unproject(camera);
+//     vec.sub(camera.position).normalize();
     
-    // var distance = - camera.position.z / vec.z;
-    var distance = - camera.position.z / -1;
+//     // var distance = - camera.position.z / vec.z;
+//     var distance = - camera.position.z / -1;
 
-    var value = vec.multiplyScalar(distance.toFixed(2));
+//     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
-    modelLists.push(gltf.scene);
-    scene.add(gltf.scene);
-    console.log('model load clear');
+//     modelLists.push(gltf.scene);
+//     scene.add(gltf.scene);
+//     console.log('model load clear');
 
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+// }, undefined, function ( error ) {
+// 	console.error( error );
+// } );
 
-// Load models
-loader.load('assets/objects/head_03.glb', function ( gltf ) {
-    gltf.scene.scale.set(45, 45, 45);			   
-    gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible = true;
+// // Load models
+// loader.load('assets/objects/head_03.glb', function ( gltf ) {
+//     gltf.scene.scale.set(45, 45, 45);			   
+//     gltf.scene.position.set(0, 0, 0);
+//     gltf.scene.visible = true;
 
-    vec.set(
-        ((1280 / camera_width) * 2 - 1).toFixed(2),
-        (- (720 / camera_height) * 2 + 1).toFixed(2),
-        0.5);
+//     vec.set(
+//         ((1280 / camera_width) * 2 - 1).toFixed(2),
+//         (- (720 / camera_height) * 2 + 1).toFixed(2),
+//         0.5);
     
-    vec.unproject(camera);
-    vec.sub(camera.position).normalize();
+//     vec.unproject(camera);
+//     vec.sub(camera.position).normalize();
     
-    // var distance = - camera.position.z / vec.z;
-    var distance = - camera.position.z / -1;
+//     // var distance = - camera.position.z / vec.z;
+//     var distance = - camera.position.z / -1;
 
-    var value = vec.multiplyScalar(distance.toFixed(2));
+//     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
-    modelLists.push(gltf.scene);
-    scene.add(gltf.scene);
-    console.log('model load clear');
+//     modelLists.push(gltf.scene);
+//     scene.add(gltf.scene);
+//     console.log('model load clear');
 
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+// }, undefined, function ( error ) {
+// 	console.error( error );
+// } );
 
-// Load models
-loader.load('assets/objects/head_04.glb', function ( gltf ) {
-    gltf.scene.scale.set(45, 45, 45);			   
-    gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible = true;
+// // Load models
+// loader.load('assets/objects/head_04.glb', function ( gltf ) {
+//     gltf.scene.scale.set(45, 45, 45);			   
+//     gltf.scene.position.set(0, 0, 0);
+//     gltf.scene.visible = true;
 
-    vec.set(
-        ((1280 / camera_width) * 2 - 1).toFixed(2),
-        (- (720 / camera_height) * 2 + 1).toFixed(2),
-        0.5);
+//     vec.set(
+//         ((1280 / camera_width) * 2 - 1).toFixed(2),
+//         (- (720 / camera_height) * 2 + 1).toFixed(2),
+//         0.5);
     
-    vec.unproject(camera);
-    vec.sub(camera.position).normalize();
+//     vec.unproject(camera);
+//     vec.sub(camera.position).normalize();
     
-    // var distance = - camera.position.z / vec.z;
-    var distance = - camera.position.z / -1;
+//     // var distance = - camera.position.z / vec.z;
+//     var distance = - camera.position.z / -1;
 
-    var value = vec.multiplyScalar(distance.toFixed(2));
+//     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
-    modelLists.push(gltf.scene);
-    scene.add(gltf.scene);
-    console.log('model load clear');
+//     modelLists.push(gltf.scene);
+//     scene.add(gltf.scene);
+//     console.log('model load clear');
 
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+// }, undefined, function ( error ) {
+// 	console.error( error );
+// } );
 
-// Load models
-loader.load('assets/objects/head_05.glb', function ( gltf ) {
-    gltf.scene.scale.set(45, 45, 45);			   
-    gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible = true;
+// // Load models
+// loader.load('assets/objects/head_05.glb', function ( gltf ) {
+//     gltf.scene.scale.set(45, 45, 45);			   
+//     gltf.scene.position.set(0, 0, 0);
+//     gltf.scene.visible = true;
 
-    vec.set(
-        ((1280 / camera_width) * 2 - 1).toFixed(2),
-        (- (720 / camera_height) * 2 + 1).toFixed(2),
-        0.5);
+//     vec.set(
+//         ((1280 / camera_width) * 2 - 1).toFixed(2),
+//         (- (720 / camera_height) * 2 + 1).toFixed(2),
+//         0.5);
     
-    vec.unproject(camera);
-    vec.sub(camera.position).normalize();
+//     vec.unproject(camera);
+//     vec.sub(camera.position).normalize();
     
-    // var distance = - camera.position.z / vec.z;
-    var distance = - camera.position.z / -1;
+//     // var distance = - camera.position.z / vec.z;
+//     var distance = - camera.position.z / -1;
 
-    var value = vec.multiplyScalar(distance.toFixed(2));
+//     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
-    modelLists.push(gltf.scene);
-    scene.add(gltf.scene);
-    console.log('model load clear');
+//     modelLists.push(gltf.scene);
+//     scene.add(gltf.scene);
+//     console.log('model load clear');
 
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+// }, undefined, function ( error ) {
+// 	console.error( error );
+// } );
 
-// Load models
-loader.load('assets/objects/head_06.glb', function ( gltf ) {
-    gltf.scene.scale.set(45, 45, 45);			   
-    gltf.scene.position.set(0, 0, 0);
-    gltf.scene.visible = true;
+// // Load models
+// loader.load('assets/objects/head_06.glb', function ( gltf ) {
+//     gltf.scene.scale.set(45, 45, 45);			   
+//     gltf.scene.position.set(0, 0, 0);
+//     gltf.scene.visible = true;
 
-    vec.set(
-        ((1280 / camera_width) * 2 - 1).toFixed(2),
-        (- (720 / camera_height) * 2 + 1).toFixed(2),
-        0.5);
+//     vec.set(
+//         ((1280 / camera_width) * 2 - 1).toFixed(2),
+//         (- (720 / camera_height) * 2 + 1).toFixed(2),
+//         0.5);
     
-    vec.unproject(camera);
-    vec.sub(camera.position).normalize();
+//     vec.unproject(camera);
+//     vec.sub(camera.position).normalize();
     
-    // var distance = - camera.position.z / vec.z;
-    var distance = - camera.position.z / -1;
+//     // var distance = - camera.position.z / vec.z;
+//     var distance = - camera.position.z / -1;
 
-    var value = vec.multiplyScalar(distance.toFixed(2));
+//     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
-    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+//     gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+//     gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
-    modelLists.push(gltf.scene);
-    scene.add(gltf.scene);
-    console.log('model load clear');
+//     modelLists.push(gltf.scene);
+//     scene.add(gltf.scene);
+//     console.log('model load clear');
 
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+// }, undefined, function ( error ) {
+// 	console.error( error );
+// } );
 
+function load3DObj(modelPath){
+    // Load models
+    loader.load(modelPath, function ( gltf ) {
+        gltf.scene.scale.set(45, 45, 45);			   
+        gltf.scene.position.set(0, 0, 0);
+        gltf.scene.visible = true;
+
+        // Set initail position
+        vec.set(
+            ((1280 / camera_width) * 2 - 1).toFixed(2),
+            (- (720 / camera_height) * 2 + 1).toFixed(2),
+            0.5);
+        vec.unproject(camera);
+        vec.sub(camera.position).normalize();
+        var distance = - camera.position.z / -1;
+        var value = vec.multiplyScalar(distance.toFixed(2));
+        
+        gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+        gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+
+        // Add to model list
+        modelLists.push(gltf.scene);
+        scene.add(gltf.scene);
+        console.log(modelPath, ' : is Loaded');
+
+    }, undefined, function ( error ) {
+        console.error( error );
+    } );
+}
+
+for (let modelIdx=1; modelIdx<=6; modelIdx++){
+    let baseModelPath = 'assets/objects/';
+    let modelObjectName = baseModelPath + 'head_0' + String(modelIdx) + '.glb';
+    console.log(modelObjectName);
+    load3DObj(modelObjectName)
+}
 
 /*
     ----------------------<<< Function >>>----------------------

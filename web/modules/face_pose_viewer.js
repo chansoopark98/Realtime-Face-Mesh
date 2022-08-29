@@ -72,7 +72,6 @@ webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시
 }, 30);
 
 webSocket.onmessage = function(message){  
-
     let recvData = message.data.split(',');
     
     if (recvData.length >=6){
