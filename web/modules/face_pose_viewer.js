@@ -46,8 +46,6 @@ const sendCanvas = document.getElementById('send_canvas');
 sendCanvas.width = dx;
 sendCanvas.height = dy;
 
-
-
 let sendContext = sendCanvas.getContext('2d');
                 
 const videoElement = document.getElementById('video');
@@ -109,8 +107,7 @@ webSocket.onmessage = function(message){
 
     
 
-    for (let deleteIdx=maxObjNums; deleteIdx>targetLoop; deleteIdx--){
-        
+    for (let deleteIdx=6; deleteIdx>targetLoop; deleteIdx--){
         visibleHandler(deleteIdx-1, false);
         
     }

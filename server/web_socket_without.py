@@ -7,6 +7,7 @@ import base64
 import service
 import cv2
 import math
+import time
 
 from post_processing import pose, sparse, rotationMatrixToEulerAngles
 
@@ -48,7 +49,7 @@ class TCPServer():
         self.cert_dir = cert_dir
         self.key_dir = key_dir
         
-        self.maximum_samples = 2
+        self.maximum_samples = 4
         self.prev_x = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_y = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_area = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
@@ -57,7 +58,7 @@ class TCPServer():
         self.sy = 240
         self.image_shape = (960, 1280) # H,W
         
-        self.scale_filter = LowPassFilter(1/5., 1/20)
+        self.scale_filter = LowPassFilter(2., 1/10)
         self.x_trans_filter = LowPassFilter(1., 1/20)
         self.y_trans_filter = LowPassFilter(1., 1/20)
         self.x_angle_filter = LowPassFilter(1., 1/20)
@@ -73,7 +74,8 @@ class TCPServer():
     
     def load_model(self):
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                        conf_threshold=0.9, nms_iou_threshold=0.5)
+                                        conf_threshold=0.9, nms_iou_threshold=0.5,
+                                        nms_max_output_size=200)
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
         self.handler = getattr(service, 'pose')
         self.color = (224, 255, 255)
@@ -109,22 +111,14 @@ class TCPServer():
 
             points = np.round(landmarks).astype(np.int)
             
-            x0, y0 = tuple(points[1])
-            x1, y1 = tuple(points[15])
-            
+            x0, _ = tuple(points[1])
+            x1, _ = tuple(points[15])
+    
+            test_arr = np.array([abs(int(x1 - x0)), 1, 1])
+            R = np.absolute(R)
+            test_arr = test_arr @ R
 
-            x_angle = batch_roll
-            y_angle = batch_pitch
-
-            if batch_pitch > 0:
-                y_angle = -batch_pitch
-            if batch_roll > 0:
-                x_angle = -batch_roll
-
-            x_vector = abs(int(((x1 - x0) * (1 + (1 - math.cos(x_angle))))))
-            y_vector = abs(int(((y1 - y0) * (1 - math.sin(y_angle)))))
-            
-            vector = int((x_vector + y_vector))
+            vector = np.add.reduce(test_arr)
             
             angles.append([batch_roll, batch_pitch, batch_yaw, vector])
         
@@ -143,30 +137,23 @@ class TCPServer():
                 width = x_max - x_min
                 height = y_max - y_min
                 
-                center_x = int(x_min + (width / 2)) 
-                center_y = int(y_min + (height / 2))
-
-                center_x += self.sx
-                center_y += self.sy
-
+                center_x = int(x_min + (width / 2)) + self.sx
+                center_y = int(y_min + (height / 2)) + self.sy
 
                 current_x_angle = self.x_angle_filter.filter(angles[idx, 0])
                 current_y_angle = self.y_angle_filter.filter(angles[idx, 1])
                 current_z_angle = self.z_angle_filter.filter(angles[idx, 2])
                 current_scale = self.scale_filter.filter((angles[idx, 3]) / self.image_shape[1])
                 
-                current_scale = round(current_scale, 2)
-                
-                
                 center_x = self.x_trans_filter.filter(center_x)
                 center_y = self.y_trans_filter.filter(center_y)
+
                 if abs(self.prev_x[idx] - center_x) > 5:
                     self.prev_x[idx] = center_x
 
                 if abs(self.prev_y[idx] - center_y) > 5:
                     self.prev_y[idx] = center_y
                 
-
 
                 if abs(self.prev_angles[idx,0] - current_x_angle) >= 0.03:
                     self.prev_angles[idx,0] = current_x_angle
@@ -179,7 +166,7 @@ class TCPServer():
                 if abs(self.prev_angles[idx,3] - current_scale) >= 0.02:
                     self.prev_angles[idx,3] = current_scale
 
-                print(current_scale, self.prev_x[idx, 0], self.prev_y[idx, 0])
+                # print(current_scale, self.prev_x[idx, 0], self.prev_y[idx, 0])
                 
                 center_x = str(self.prev_x[idx, 0]) + ','
                 center_y = str(self.prev_y[idx, 0]) + ','

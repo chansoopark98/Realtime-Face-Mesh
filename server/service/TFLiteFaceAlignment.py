@@ -8,7 +8,7 @@ from functools import partial
 
 
 class BaseTFLiteFaceAlignment():
-    def __init__(self, model_path, num_threads=8):
+    def __init__(self, model_path, num_threads=1):
         # tflite model init
         self._interpreter = tf.lite.Interpreter(model_path=model_path,
                                                 num_threads=num_threads)
