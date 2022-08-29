@@ -131,8 +131,16 @@ class TCPServer():
                 rotate_matrix = np.absolute(rotate_matrix)
                 index_arr = np.array(rotate_matrix[idx])
                 
-                test_arr = np.array([width, height, 0.5])
+                
+
+                test_arr = np.array([width, height * 0.9, -0.03])
+                
+                # if index_arr[0, 1] > 0.4:
+                #     index_arr[0, 1] = 0.4
+
+                
                 test_scale = test_arr @ index_arr
+                
                 vector = np.add.reduce(test_scale)
                 
                 cx = int(x_min + (width / 2)) + self.sx

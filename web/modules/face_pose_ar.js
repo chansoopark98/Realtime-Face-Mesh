@@ -110,9 +110,6 @@ function visibleHandler(Idx, bool){
 
 // Websocket을 통해 얻은 정보를 바탕으로 object들의 위치 및 회전을 update
 function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot, z_rot) {
-
-    console.log(center_x)
-    
     center_y = center_y - 30 ;
 
     scale = (120 * scale).toFixed(0);
@@ -138,8 +135,6 @@ function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot,
     modelLists[idx].rotation.x = (-x_rot).toFixed(2);
     modelLists[idx].rotation.y = (-y_rot).toFixed(2);
     modelLists[idx].rotation.z = (-z_rot).toFixed(2);
-
-    console.log(scale);
 
 }
 
