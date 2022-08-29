@@ -4,11 +4,49 @@
  *  Capture function for augmented reality (video/canvas element)
  */
 
+const CAMERA_SERVER_FLAG = '$$CAM_SERVER';
+const GET_IMAGE_FLAG = '$$GETIMG';
 const captureCanvas = document.createElement('canvas');
 const captureContext = captureCanvas.getContext('2d');
 const frameConfigPath = "./assets/img/frame.json";
 let frameConfig = null;
 let captureButton = null;
+
+function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch) {
+    const wss = new WebSocket('wss://127.0.0.1:5503');
+
+    wss.onmessage = (msg) => {
+        const data = msg.data;
+
+        if (data == GET_IMAGE_FLAG) {
+            const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
+            const imgBase64 = getFrame([ capturedImage ]);
+            console.log(imgBase64)
+            wss.send(imgBase64);
+        }
+    };
+
+    wss.onopen = () => {
+        wss.send(JSON.stringify(CAMERA_SERVER_FLAG));
+        console.log("connect successfully!");
+    };
+
+    wss.onclose = () => {
+        console.log("disconneted")
+        reject(false);
+    };
+
+    wss.onerror = () => {
+        console.log("error occured! failed to connect server.")
+        reject(false);
+    };
+
+    return{
+        sendCaptureMsg: () => {
+            wss.send(JSON.stringify(GET_IMAGE_FLAG));
+        }
+    } 
+}
 
 function getCurrentDate() {
     const current = new Date();
@@ -107,6 +145,7 @@ function createCaptureButton(videoElement,
     }
 
     getFrameInfo();
+    connectCaptureServer(videoElement, layerList, cx, cy, cw, ch);
 
     captureButton.addEventListener('click', (event) => {
         const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
@@ -134,7 +173,6 @@ function getFrame(imgList, mode='normal') {
     frameImg.onload = () => {
         frameCanvas.width = frameWidth;
         frameCanvas.height = frameHeight;
-        frameContext.drawImage(frameImg, 0, 0, frameWidth, frameHeight);
 
         Object.keys(config[mode].idx).forEach((id) => {
             const ox = config[mode].idx[id].offsetX;
@@ -155,8 +193,10 @@ function getFrame(imgList, mode='normal') {
 
             createImageBitmap(imgData).then((imgBitmap) => {
                 frameContext.drawImage(imgBitmap, ox, oy, rw, rh);
+                frameContext.drawImage(frameImg, 0, 0, frameWidth, frameHeight);
                 const imgBase64 = frameCanvas.toDataURL('image/png', 1.0);
                 downloadImage(imgBase64);
+                return imgBase64;
             })
         });
     }
