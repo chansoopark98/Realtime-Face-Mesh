@@ -23,3 +23,6 @@ threejs 설치 안될때
 vsocde extension
     code runner
     live server
+
+
+https://itnext.io/promise-loading-with-three-js-78a6297652a5

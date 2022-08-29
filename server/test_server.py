@@ -130,19 +130,13 @@ class TCPServer():
 
                 rotate_matrix = np.absolute(rotate_matrix)
                 index_arr = np.array(rotate_matrix[idx])
-                
-                
 
-                test_arr = np.array([width, height * 0.9, -0.03])
-                
-                # if index_arr[0, 1] > 0.4:
-                #     index_arr[0, 1] = 0.4
-
+                test_arr = np.array([width, height, 1])
                 
                 test_scale = test_arr @ index_arr
-                
-                vector = np.add.reduce(test_scale)
-                
+  
+                vector = np.add.reduce(test_scale) - abs(angle_filtered[idx, 2] * width)
+
                 cx = int(x_min + (width / 2)) + self.sx
                 cy = int(y_min + (height / 2)) + self.sy
 
@@ -167,7 +161,6 @@ class TCPServer():
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
 
-        
         return output
         
     async def loop_logic(self, websocket, path):

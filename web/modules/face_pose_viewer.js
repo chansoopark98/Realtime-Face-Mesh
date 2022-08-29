@@ -1,5 +1,5 @@
 import * as camera_util from './camera.js';
-import { visibleHandler, updateRotationAndPosition} from './face_pose_ar.js';
+import { visibleHandler, updateRotationAndPosition } from './face_pose_ar.js';
 import * as captureFunc from './capture.js'
 
 /*
@@ -69,14 +69,16 @@ webSocket.onmessage = function(message){
     let detectIdx=1
     let recvData = message.data.split(',');
     
-    if (recvData.length >=6){
+    if (recvData.length >6){
         targetLoop = recvData.length/6
     }
     else{
         targetLoop = 0;
     }
+    console.log(targetLoop);
     
     for (detectIdx; detectIdx<=targetLoop; detectIdx++){
+
   
         let idx = detectIdx * 6;
         
@@ -101,7 +103,7 @@ webSocket.onmessage = function(message){
 
     
 
-    for (let deleteIdx=6; deleteIdx>targetLoop; deleteIdx--){
+    for (let deleteIdx=4; deleteIdx>targetLoop; deleteIdx--){
         if (detectIdx <= deleteIdx){
             
             visibleHandler(deleteIdx-1, false);

@@ -17,7 +17,9 @@ import { RoomEnvironment } from './three.js/environments/RoomEnvironment.js';
 let camera_width = 2560; // 렌더링할 캔버스 너비
 let camera_height = 1440; // 렌더링할 캔버스 높이
 let baseModelPath = 'assets/objects/'; // 3d model path
-let modelLists = []; // 3d object models
+let modelLists = []; // Disk에서 불러온 3d model object
+let chooseModelList = []; // 랜덤으로 choice한 3d model object
+
 let pos = new THREE.Vector3(); // create once and reuse
 let vec = new THREE.Vector3(); // create once and reuse
 
@@ -63,7 +65,26 @@ camera.position.x = 0;
 camera.position.y = 0;
 camera.position.z = 10;
 
+function prepareModel(){
+    for (let modelIdx=1; modelIdx<=6; modelIdx++){
+        let modelObjectName = baseModelPath + 'head_0' + String(modelIdx) + '.glb';
+        console.log(modelObjectName);
+        load3DObj(modelObjectName);
+    }
+    
+}
+
+prepareModel();
+
+
+
+/*
+    ----------------------<<< Function >>>----------------------
+*/
+
+// Disk에 저장되어 있는 .obj 모델을 load한 뒤 모델 리스트에 추가하는 함수
 function load3DObj(modelPath){
+    console.log('load3DObj');
     // Load models
     loader.load(modelPath, function ( gltf ) {
         gltf.scene.scale.set(45, 45, 45);			   
@@ -87,21 +108,25 @@ function load3DObj(modelPath){
         modelLists.push(gltf.scene);
         scene.add(gltf.scene);
         console.log(modelPath, ' : is Loaded');
-
+        
     }, undefined, function ( error ) {
         console.error( error );
     } );
+    
 }
 
-for (let modelIdx=1; modelIdx<=6; modelIdx++){
-    let modelObjectName = baseModelPath + 'head_0' + String(modelIdx) + '.glb';
-    console.log(modelObjectName);
-    load3DObj(modelObjectName)
+// ModelList에서 display할 modeld을 선택합니다.
+function randomModelSelector(){
+    let randomIntMin = Math.ceil(0);
+    let randomIntMax = Math.floor(6);
+    let randomInt =  Math.floor(Math.random() * (randomIntMax - randomIntMin)) + randomIntMin;
+    for (let chooseIdx=0; chooseIdx<=3; chooseIdx++){
+        console.log(modelLists)
+        let chooseModel = modelLists[randomInt].clone();
+        chooseModelList.push(chooseModel);
+    }
+    console.log('chooseModelList is ready', chooseModelList);
 }
-
-/*
-    ----------------------<<< Function >>>----------------------
-*/
 
 // Object들의 시각화 여부를 제어하는 함수
 function visibleHandler(Idx, bool){
@@ -110,11 +135,14 @@ function visibleHandler(Idx, bool){
 
 // Websocket을 통해 얻은 정보를 바탕으로 object들의 위치 및 회전을 update
 function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot, z_rot) {
+    
+    console.log(chooseModelList);
     center_y = center_y - 30 ;
 
     scale = (120 * scale).toFixed(0);
 
-    modelLists[idx].scale.set(scale, scale, scale)
+    // modelLists[idx].scale.set(scale, scale, scale);
+    chooseModelList[idx].scale.set(scale, scale, scale);
 
     vec.set(
         ((center_x / camera_width) * 2 - 1).toFixed(2),
@@ -129,12 +157,18 @@ function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot,
 
     var value = vec.multiplyScalar(distance.toFixed(2));
     
-    modelLists[idx].position.x = (pos.x + value.x).toFixed(2);
-    modelLists[idx].position.y = (pos.y + value.y).toFixed(2);
+    // modelLists[idx].position.x = (pos.x + value.x).toFixed(2);
+    // modelLists[idx].position.y = (pos.y + value.y).toFixed(2);
+    chooseModelList[idx].position.x = (pos.x + value.x).toFixed(2);
+    chooseModelList[idx].position.y = (pos.y + value.y).toFixed(2);
 
-    modelLists[idx].rotation.x = (-x_rot).toFixed(2);
-    modelLists[idx].rotation.y = (-y_rot).toFixed(2);
-    modelLists[idx].rotation.z = (-z_rot).toFixed(2);
+    // modelLists[idx].rotation.x = (-x_rot).toFixed(2);
+    // modelLists[idx].rotation.y = (-y_rot).toFixed(2);
+    // modelLists[idx].rotation.z = (-z_rot).toFixed(2);
+
+    chooseModelList[idx].rotation.x = (-x_rot).toFixed(2);
+    chooseModelList[idx].rotation.y = (-y_rot).toFixed(2);
+    chooseModelList[idx].rotation.z = (-z_rot).toFixed(2);
 
 }
 
