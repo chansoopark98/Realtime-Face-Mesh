@@ -65,32 +65,30 @@ camera.position.x = 0;
 camera.position.y = 0;
 camera.position.z = 10;
 
-function prepareModel(){
-    for (let modelIdx=1; modelIdx<=6; modelIdx++){
-        let modelObjectName = baseModelPath + 'head_0' + String(modelIdx) + '.glb';
-        console.log(modelObjectName);
-        load3DObj(modelObjectName);
-    }
-    
-}
-
-prepareModel();
-
-
-
 /*
     ----------------------<<< Function >>>----------------------
 */
 
+async function prepareModel(){
+    for (let modelIdx=1; modelIdx<=6; modelIdx++){
+        let modelObjectName = baseModelPath + 'head_0' + String(modelIdx) + '.glb';
+        console.log(modelObjectName);
+        await load3DObj(modelObjectName);
+    }
+    // 랜덤 모델을 선택한 뒤 scene에 추가합니다.
+    randomModelInitialize();
+}
+
+
 // Disk에 저장되어 있는 .obj 모델을 load한 뒤 모델 리스트에 추가하는 함수
-function load3DObj(modelPath){
+async function load3DObj(modelPath){
     console.log('load3DObj');
     // Load models
-    loader.load(modelPath, function ( gltf ) {
+    return await loader.loadAsync(modelPath).then(function(gltf){
         gltf.scene.scale.set(45, 45, 45);			   
         gltf.scene.position.set(0, 0, 0);
-        gltf.scene.visible = true;
-
+        gltf.scene.visible = false;
+    
         // Set initail position
         vec.set(
             ((1280 / camera_width) * 2 - 1).toFixed(2),
@@ -103,16 +101,12 @@ function load3DObj(modelPath){
         
         gltf.scene.position.x = (pos.x + value.x).toFixed(2);
         gltf.scene.position.y = (pos.y + value.y).toFixed(2);
-
+    
         // Add to model list
         modelLists.push(gltf.scene);
-        scene.add(gltf.scene);
+        // scene.add(gltf.scene);
         console.log(modelPath, ' : is Loaded');
-        
-    }, undefined, function ( error ) {
-        console.error( error );
-    } );
-    
+    });
 }
 
 // ModelList에서 display할 modeld을 선택합니다.
@@ -128,15 +122,32 @@ function randomModelSelector(){
     console.log('chooseModelList is ready', chooseModelList);
 }
 
+// scene에 있는 모델을 초기화한 뒤, 랜덤 모델을 선택한 뒤 scene에 추가합니다.
+function randomModelInitialize(){
+    // scene에 있는 모델 초기화
+    scene.remove(chooseModelList[0]);
+    scene.remove(chooseModelList[1]);
+    scene.remove(chooseModelList[2]);
+    scene.remove(chooseModelList[3]);
+    
+    // 랜덤 모델 선택
+    randomModelSelector();
+    // 선택된 랜덤 모델 scene에 추가
+    for (let chooseIdx=0; chooseIdx<=3; chooseIdx++){
+        scene.add(chooseModelList[chooseIdx]);
+    }
+    console.log(scene);
+}
+
 // Object들의 시각화 여부를 제어하는 함수
 function visibleHandler(Idx, bool){
-    modelLists[Idx].visible = bool;
+    chooseModelList[Idx].visible = bool;
 }
 
 // Websocket을 통해 얻은 정보를 바탕으로 object들의 위치 및 회전을 update
 function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot, z_rot) {
     
-    console.log(chooseModelList);
+    
     center_y = center_y - 30 ;
 
     scale = (120 * scale).toFixed(0);
@@ -179,4 +190,6 @@ async function render_ar_video() {
     setTimeout(render_ar_video, 1)
 }
 
-export { visibleHandler, updateRotationAndPosition};
+prepareModel();
+
+export { visibleHandler, updateRotationAndPosition, randomModelInitialize, };
