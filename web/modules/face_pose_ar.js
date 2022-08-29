@@ -66,6 +66,24 @@ loader.load('assets/objects/head_01.glb', function ( gltf ) {
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
 
+    vec.set(
+        ((1280 / camera_width) * 2 - 1).toFixed(2),
+        (- (720 / camera_height) * 2 + 1).toFixed(2),
+        0.5);
+    
+    vec.unproject(camera);
+    vec.sub(camera.position).normalize();
+    
+    // var distance = - camera.position.z / vec.z;
+    var distance = - camera.position.z / -1;
+
+    var value = vec.multiplyScalar(distance.toFixed(2));
+    
+    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+
+
+
     modelLists.push(gltf.scene);
     scene.add(gltf.scene);
     console.log('model load clear');
@@ -79,6 +97,22 @@ loader.load('assets/objects/head_02.glb', function ( gltf ) {
     gltf.scene.scale.set(45, 45, 45);			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
+
+    vec.set(
+        ((1280 / camera_width) * 2 - 1).toFixed(2),
+        (- (720 / camera_height) * 2 + 1).toFixed(2),
+        0.5);
+    
+    vec.unproject(camera);
+    vec.sub(camera.position).normalize();
+    
+    // var distance = - camera.position.z / vec.z;
+    var distance = - camera.position.z / -1;
+
+    var value = vec.multiplyScalar(distance.toFixed(2));
+    
+    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
     modelLists.push(gltf.scene);
     scene.add(gltf.scene);
@@ -94,6 +128,22 @@ loader.load('assets/objects/head_03.glb', function ( gltf ) {
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
 
+    vec.set(
+        ((1280 / camera_width) * 2 - 1).toFixed(2),
+        (- (720 / camera_height) * 2 + 1).toFixed(2),
+        0.5);
+    
+    vec.unproject(camera);
+    vec.sub(camera.position).normalize();
+    
+    // var distance = - camera.position.z / vec.z;
+    var distance = - camera.position.z / -1;
+
+    var value = vec.multiplyScalar(distance.toFixed(2));
+    
+    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+
     modelLists.push(gltf.scene);
     scene.add(gltf.scene);
     console.log('model load clear');
@@ -107,6 +157,22 @@ loader.load('assets/objects/head_04.glb', function ( gltf ) {
     gltf.scene.scale.set(45, 45, 45);			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
+
+    vec.set(
+        ((1280 / camera_width) * 2 - 1).toFixed(2),
+        (- (720 / camera_height) * 2 + 1).toFixed(2),
+        0.5);
+    
+    vec.unproject(camera);
+    vec.sub(camera.position).normalize();
+    
+    // var distance = - camera.position.z / vec.z;
+    var distance = - camera.position.z / -1;
+
+    var value = vec.multiplyScalar(distance.toFixed(2));
+    
+    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
     modelLists.push(gltf.scene);
     scene.add(gltf.scene);
@@ -122,6 +188,22 @@ loader.load('assets/objects/head_05.glb', function ( gltf ) {
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
 
+    vec.set(
+        ((1280 / camera_width) * 2 - 1).toFixed(2),
+        (- (720 / camera_height) * 2 + 1).toFixed(2),
+        0.5);
+    
+    vec.unproject(camera);
+    vec.sub(camera.position).normalize();
+    
+    // var distance = - camera.position.z / vec.z;
+    var distance = - camera.position.z / -1;
+
+    var value = vec.multiplyScalar(distance.toFixed(2));
+    
+    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
+
     modelLists.push(gltf.scene);
     scene.add(gltf.scene);
     console.log('model load clear');
@@ -135,6 +217,22 @@ loader.load('assets/objects/head_06.glb', function ( gltf ) {
     gltf.scene.scale.set(45, 45, 45);			   
     gltf.scene.position.set(0, 0, 0);
     gltf.scene.visible = true;
+
+    vec.set(
+        ((1280 / camera_width) * 2 - 1).toFixed(2),
+        (- (720 / camera_height) * 2 + 1).toFixed(2),
+        0.5);
+    
+    vec.unproject(camera);
+    vec.sub(camera.position).normalize();
+    
+    // var distance = - camera.position.z / vec.z;
+    var distance = - camera.position.z / -1;
+
+    var value = vec.multiplyScalar(distance.toFixed(2));
+    
+    gltf.scene.position.x = (pos.x + value.x).toFixed(2);
+    gltf.scene.position.y = (pos.y + value.y).toFixed(2);
 
     modelLists.push(gltf.scene);
     scene.add(gltf.scene);
