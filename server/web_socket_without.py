@@ -43,7 +43,7 @@ class TCPServer():
 
     def rcv_data(self, data: str, filter_list: list):
         scale_filter, x_angle_filter, y_angle_filter,\
-                                z_angle_filter, kalman_test= filter_list
+                                z_angle_filter= filter_list
         # initailize
         output = ''
         angles = []
@@ -147,17 +147,17 @@ class TCPServer():
         return output
         
     async def loop_logic(self, websocket, path):
+        print('init session')
         scale_filter = LowPassFilter(2., 1/10)
         x_angle_filter = LowPassFilter(1., 1/20)
         y_angle_filter = LowPassFilter(1., 1/20)
         z_angle_filter = LowPassFilter(1., 1/20)
-        kalman_test = KalmanFilter1D()
+        # kalman_test = KalmanFilter1D()
 
         filter_list = [scale_filter,
                        x_angle_filter,
                        y_angle_filter,
-                       z_angle_filter,
-                       kalman_test]
+                       z_angle_filter]
         while True:    
             # Wait data from client
             

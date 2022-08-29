@@ -112,7 +112,7 @@ function visibleHandler(Idx, bool){
 function updateRotationAndPosition(idx, center_x, center_y, scale, x_rot, y_rot, z_rot) {
 
     
-    center_y = center_y - 30;
+    center_y = center_y ;
 
     scale = (200 * scale).toFixed(0);
 
