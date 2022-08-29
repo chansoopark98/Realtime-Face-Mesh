@@ -66,6 +66,7 @@ webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시
 }, 30);
 
 webSocket.onmessage = function(message){  
+    let detectIdx=1
     let recvData = message.data.split(',');
     
     if (recvData.length >=6){
@@ -75,7 +76,7 @@ webSocket.onmessage = function(message){
         targetLoop = 0;
     }
     
-    for (let detectIdx=1; detectIdx<=targetLoop; detectIdx++){
+    for (detectIdx; detectIdx<=targetLoop; detectIdx++){
   
         let idx = detectIdx * 6;
         
@@ -101,7 +102,11 @@ webSocket.onmessage = function(message){
     
 
     for (let deleteIdx=6; deleteIdx>targetLoop; deleteIdx--){
-        visibleHandler(deleteIdx-1, false);
+        if (detectIdx <= deleteIdx){
+            
+            visibleHandler(deleteIdx-1, false);
+        }
+        
         
     }
     

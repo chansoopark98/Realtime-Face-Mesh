@@ -98,7 +98,9 @@ class BaseTFLiteFaceAlignment():
         """
 
         for box in detected_faces:
+            # print(box[2] - box[0])
             if box[2] - box[0] < 100:
+                
                 continue
             inp, M = self._preprocessing(image, box)
             self._inference(inp)
