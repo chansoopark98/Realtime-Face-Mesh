@@ -10,7 +10,6 @@ import service
 import cv2
 import math
 from post_processing import rotationMatrixToEulerAngles
-from signal_filters import KalmanFilter1D, LowPassFilter
 
 class LowPassFilterMulti(object):
     def __init__(self, cut_off_freqency, ts, maximum_samples, shape):
@@ -51,106 +50,130 @@ class TCPServer():
         self.load_model()
     
     def load_model(self):
+        # Face detection tflite converted model
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                        conf_threshold=0.9, nms_iou_threshold=0.5,
-                                        nms_max_output_size=200)
+                                                 conf_threshold=0.6, nms_iou_threshold=0.5,
+                                                 nms_max_output_size=200)
+        # Facial landmark detection tflite converted model
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
+        # Service handler
         self.handler = getattr(service, 'pose')
-        self.color = (224, 255, 255)
-
-    def rcv_data(self, data: str, filter_list: list):
-        
-        xy_filter, angle_filter = filter_list
-        # initailize
+    
+    def rcv_data(self, data: str, angle_filter: LowPassFilterMulti) -> str:
+        """
+            Args:
+                Websocket API가 Request data를 수신한 뒤 decode 후 처리하는 함수
+                data         (str)            : base64 encode string
+                angle_filter (class instance) : Low pass filter 1D multi scalars
+        """
+        # 변수 초기화
         output = ''
         angles = []
         rotate_matrix = []
-
+        
+        # Base64 이미지를 받은 뒤 np.ndarray로 decode
         base64_data = data[0]
         imgdata = base64.b64decode(base64_data)
         frame = np.frombuffer(imgdata, np.uint8)
         frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
 
-        # face detection
+        # Face detection
         boxes, _ = self.fd.inference(frame) # boxes, scores
-
+        
+        # Facial landmark를 계산하기 위해 frame image 복사
         feed = frame.copy()
 
+        # Post processing
         for results in self.fa.get_landmarks(feed, boxes):
+            # Get 3x3 rotation matrix
             _, params = results
             R = params[:3, :3].copy()
-            # print(params[:, 3:])
+            
+            # 3x3 rotation matrix to euler angles
             angle = rotationMatrixToEulerAngles(R)
             
-            batch_roll, batch_pitch, batch_yaw = angle
+            x_rot, y_rot, z_rot = angle
 
-            # Degree to Radians
-            batch_roll = math.radians(batch_roll)
-            batch_pitch = math.radians(batch_pitch)
-            batch_yaw = math.radians(batch_yaw)
-
-            # points = np.round(landmarks).astype(np.int)
+            # Euler angles to Radians
+            x_rot = math.radians(x_rot)
+            y_rot = math.radians(y_rot)
+            z_rot = math.radians(z_rot)
             
-            # x0, _ = tuple(points[1])
-            # x1, _ = tuple(points[15])
-
-            angles.append([batch_roll, batch_pitch, batch_yaw])
+            # List append angles in radians for each axis
+            angles.append([x_rot, y_rot, z_rot])
+            # List append 3x3 rotation matrix
             rotate_matrix.append(R)
             
-
+        # Python list to numpy array
         angles = np.array(angles)
         
-        # boxes (N, 4)
+        # Check the number of detected objects
         number_samples = angles.shape[0]
 
+        # When more than one object is detected
         if number_samples >= 1:
+            # Limit when the detected object is larger than the maximum detection limit
             if number_samples > self.maximum_samples:
                 number_samples = self.maximum_samples
             
+            # Limit the number of detected faces
             boxes = boxes[:number_samples]
 
-            # Calc angle and scale by LPF
+            # Calculate angle by LPF
             zero_angle = np.zeros((self.maximum_samples, 3))
-            zero_box = np.zeros((self.maximum_samples, 4))
-            
             for i in range(number_samples):
                 zero_angle[i] = angles[i]
-                zero_box[i] = boxes[i]
-
             angle_filtered = angle_filter.filter(zero_angle)
-            # xy_filtered = xy_filter.filter(zero_box)
-            
             angle_filtered = np.round(angle_filtered, 2)
-
+            
+            # Calculate objects' center x,y and return detection results
             for idx in range(number_samples):
+                """
+                    boxes -> (N, 4) : N is number of detections.
+                    The maximum value of N is self.maximum_samples.
+                """
                 x_min, y_min, x_max, y_max = boxes[idx]
-                # x_min, y_min, x_max, y_max = xy_filtered[idx]
+
+                # Calculate face boxes's width and height
                 width = x_max - x_min
                 height = y_max - y_min
 
+                """ Calculate object's scale """
+                # 3x3 rotation matrix convert to absolute
                 rotate_matrix = np.absolute(rotate_matrix)
-                index_arr = np.array(rotate_matrix[idx])
-
+                
+                # Converts it to x, y, z vectors using the object's width and height values.
                 test_arr = np.array([width, height, 1])
                 
-                test_scale = test_arr @ index_arr
-  
-                vector = np.add.reduce(test_scale) - abs(angle_filtered[idx, 2] * width)
+                # Restore the rotated vector using the rotation matrix.
+                test_scale = test_arr @ rotate_matrix[idx]
 
+                # X,Y,Z vector reducing 
+                vector = np.add.reduce(test_scale) 
+
+                # Compensation by the value rotated along the z-axis
+                vector -= np.absolute(angle_filtered[idx, 2] * width)
+
+                """Restore the x,y coordinates according to the size of 
+                   the frame received through the Websocket"""
                 cx = int(x_min + (width / 2)) + self.sx
                 cy = int(y_min + (height / 2)) + self.sy
 
+                """ Clipping by comparing the difference with the previous result """
+                # Clip x
                 if abs(self.prev_x[idx, 0] - cx) > 5:
                     self.prev_x[idx, 0] = cx
 
+                # Clip y
                 if abs(self.prev_y[idx, 0] - cy) > 5:
                     self.prev_y[idx, 0] = cy
-                
+
+                # Clip scale
                 norm_scale = vector / self.image_shape[1]
-                
-                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.01:
+                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.03:
                     self.prev_scales[idx, 0] = norm_scale
                 
+                """ Convert detection results (center x, y, angles, scale) to string """
                 center_x = str(round(self.prev_x[idx, 0])) + ','
                 center_y = str(round(self.prev_y[idx, 0])) + ','
                 roll = str(angle_filtered[idx, 0]) + ','
@@ -160,23 +183,22 @@ class TCPServer():
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
-
+        cv2.imshow('test', frame)
+        cv2.waitKey(1)
         return output
         
-    async def loop_logic(self, websocket, path):
-        print('init session')
-        # scale_filter = LowPassFilterMulti(2., 1/10, self.maximum_samples, 1)
-        xy_filter = LowPassFilterMulti(1., 1/10, self.maximum_samples, 4)
-        angle_filter = LowPassFilterMulti(1., 1/20, self.maximum_samples, 3)
-        # kalman_test = KalmanFilter1D()
-        filter_lists = [xy_filter, angle_filter]
+    async def loop_logic(self, websocket: websockets, path):
+        angle_filter = LowPassFilterMulti(4., 1/20, self.maximum_samples, 3)
+        
         while True:    
             # Wait data from client
-            
             data = await asyncio.gather(websocket.recv())
-            rcv_data = self.rcv_data(data=data, filter_list=filter_lists)
+            # Encode and calculate detection
+            rcv_data = self.rcv_data(data=data, angle_filter=angle_filter)
+            # Remove end of string ','
             if rcv_data != '':
                 rcv_data = rcv_data[:-1]
+            # Send to client
             await websocket.send(rcv_data)
 
     def run_server(self):

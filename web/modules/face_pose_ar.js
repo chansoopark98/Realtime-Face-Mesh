@@ -53,10 +53,10 @@ let pointLightCenter = new THREE.PointLight(0xffffff);
 pointLightRight.position.set(100, 100, 0);
 pointLightLeft.position.set(-100, 100, 0);
 pointLightBottom.position.set(0, -100, 0);
-pointLightCenter.position.set(0, 30, 100);
+pointLightCenter.position.set(0, 10, 100);
 scene.add(pointLightRight);
 scene.add(pointLightLeft);
-scene.add(pointLightBottom);
+// scene.add(pointLightBottom);
 scene.add(pointLightCenter);
 
 // Set default camera position
