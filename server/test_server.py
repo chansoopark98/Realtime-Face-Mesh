@@ -52,7 +52,7 @@ class TCPServer():
     def load_model(self):
         # Face detection tflite converted model
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                                 conf_threshold=0.9, nms_iou_threshold=0.5,
+                                                 conf_threshold=0.6, nms_iou_threshold=0.5,
                                                  nms_max_output_size=200)
         # Facial landmark detection tflite converted model
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
@@ -183,6 +183,8 @@ class TCPServer():
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
+        cv2.imshow('test', frame)
+        cv2.waitKey(1)
         return output
         
     async def loop_logic(self, websocket: websockets, path):
