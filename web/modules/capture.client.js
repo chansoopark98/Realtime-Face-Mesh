@@ -26,8 +26,8 @@ function setPreviewLayer(imgBase64) {
         previewImg.style.height = '95%';
         
         previewImg.onload = () => {
-            captureBtn.style.backgroundColor = "#CCC";
-            preview.style.display = "flex";
+            captureBtn.style.backgroundColor = '#CCC';
+            preview.style.display = 'flex';
         };
 
         guideContainer.appendChild(preview);
@@ -68,7 +68,7 @@ function connectServer() {
 window.onload = () => {
     const server = connectServer();
     captureBtn.addEventListener('click', () => {
-        captureBtn.style.backgroundColor = "#FF3333";
+        captureBtn.style.backgroundColor = '#FF3333';
         server.sendCaptureMsg();
     });
 }
