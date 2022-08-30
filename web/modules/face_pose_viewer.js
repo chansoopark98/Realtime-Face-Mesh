@@ -1,6 +1,6 @@
 import * as camera_util from './camera.js';
 import { visibleHandler, updateRotationAndPosition, randomModelInitialize } from './face_pose_ar.js';
-import * as captureFunc from './capture.js'
+// import * as captureFunc from './capture.js'
 
 /*
     ----------------------<<< Global variable >>>----------------------
@@ -49,8 +49,8 @@ randomSelectButton.onclick = randomModelInitialize;
 
 // Video frame을 Websocket으로 전송하기 위한 이미지 전송용 canvas
 const sendCanvas = document.getElementById('send_canvas');
-sendCanvas.width = 1280;
-sendCanvas.height = 960;
+sendCanvas.width = 1600;
+sendCanvas.height = 1200;
 
 let sendContext = sendCanvas.getContext('2d');
                 
@@ -63,7 +63,7 @@ console.log(videoElement.videoWidth, videoElement.videoHeight);
 webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시지 전송
     if (webSocket.readyState === webSocket.OPEN) {
         
-        let sendData = sendCanvas.toDataURL('image/jpeg', 0.7)
+        let sendData = sendCanvas.toDataURL('image/jpeg', 0.5)
         webSocket.send(sendData.split(",")[1]);
         
     }
@@ -125,7 +125,8 @@ async function render_video(){
     
     // sendContext.drawImage(videoElement, 640, 180, 1920, 1080, 0, 0, 1920, 1080);
     // sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, dx, dy);
-    sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1280, 960);
+    // sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1280, 960);
+    sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1600, 1200);
 
     await requestAnimationFrame(render_video);
 }
@@ -137,8 +138,8 @@ window.onload = () => {
     // canvas.height = height;
     camera_util.getCamera(videoElement);
 
-    const renderAR = document.querySelector('#render_ar');
-    const layer = [ canvas, renderAR ];
-    // const layer = [ renderAR ];
-    captureFunc.createCaptureButton(videoElement, layer, sx, sy, dx, dy);
+    // const renderAR = document.querySelector('#render_ar');
+    // const layer = [ canvas, renderAR ];
+    // // const layer = [ renderAR ];
+    // captureFunc.createCaptureButton(videoElement, layer, sx, sy, dx, dy);
 }

@@ -43,9 +43,9 @@ class TCPServer():
         self.prev_x = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_y = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_scales = np.zeros((self.maximum_samples, 1))
-        self.sx = 640 #480
-        self.sy = 240
-        self.image_shape = (960, 1280) # H,W
+        self.sx = 480 #480
+        self.sy = 120
+        self.image_shape = (1200, 1600) # H,W
         
         self.load_model()
     
@@ -80,6 +80,17 @@ class TCPServer():
         # Face detection
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
+        # Cut off by boxes scale
+        box_cut_off = 100
+        condition = (boxes[:, 2] - boxes[:, 0]) > box_cut_off
+        mask = np.where(condition, True, False)
+        boxes = boxes[mask]
+
+        # Clip by maximum samples
+        n_boxes = boxes.shape[0]
+        if n_boxes >= self.maximum_samples:
+            boxes = boxes[:self.maximum_samples]
+
         # Facial landmark를 계산하기 위해 frame image 복사
         feed = frame.copy()
 
@@ -116,8 +127,8 @@ class TCPServer():
             if number_samples > self.maximum_samples:
                 number_samples = self.maximum_samples
             
-            # Limit the number of detected faces
-            boxes = boxes[:number_samples]
+            # # Limit the number of detected faces
+            # boxes = boxes[:number_samples]
 
             # Calculate angle by LPF
             zero_angle = np.zeros((self.maximum_samples, 3))
@@ -139,7 +150,7 @@ class TCPServer():
                 height = y_max - y_min
 
                 """ Calculate object's scale """
-                # 3x3 rotation matrix convert to absolute
+                # 3x3 rotation matrix convert to absolute (python list to numpy array)
                 rotate_matrix = np.absolute(rotate_matrix)
                 
                 # Converts it to x, y, z vectors using the object's width and height values.
@@ -158,7 +169,8 @@ class TCPServer():
                    the frame received through the Websocket"""
                 cx = int(x_min + (width / 2)) + self.sx
                 cy = int(y_min + (height / 2)) + self.sy
-
+                
+                
                 """ Clipping by comparing the difference with the previous result """
                 # Clip x
                 if abs(self.prev_x[idx, 0] - cx) > 5:
@@ -183,8 +195,8 @@ class TCPServer():
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
-        cv2.imshow('test', frame)
-        cv2.waitKey(1)
+        # cv2.imshow('test', frame)
+        # cv2.waitKey(1)
         return output
         
     async def loop_logic(self, websocket: websockets, path):
