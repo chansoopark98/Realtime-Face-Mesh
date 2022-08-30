@@ -1,49 +1,36 @@
 import { flag } from './server.flags.js';
 import { downloadImage } from './capture.js'
 
-const container = document.querySelector('.container');
+const guideContainer = document.querySelector('.guide-container');
 const captureBtn = document.querySelector('#capture-btn');
 let preview = null;
 let previewImg = null;
-let previewDownloadBtn = null;
+
 
 function setPreviewLayer(imgBase64) {
     if (!preview) {
         preview = document.createElement('div');
         preview.style.position = 'abosolute';
-        preview.style.width = '90%';
-        preview.style.height = '90%';
-        preview.style.backgroundColor = '#eee';
-        preview.style.borderRadius = '8px';
+        preview.style.width = '100%';
+        preview.style.height = '100%';
+        preview.style.backgroundColor = '#ccc';
         preview.style.display = 'none';
         preview.style.justifyContent = 'center';
+        preview.style.alignItems = 'center';
         preview.style.zIndex = '2';
 
         previewImg = new Image();
         preview.appendChild(previewImg);
         previewImg.style.position = 'absolute';
-        previewImg.style.width = '80%';
-        previewImg.style.paddingTop = '40px';
+        previewImg.style.width = '95%';
+        previewImg.style.height = '95%';
         
         previewImg.onload = () => {
+            captureBtn.style.backgroundColor = "#CCC";
             preview.style.display = "flex";
         };
 
-        previewDownloadBtn = document.createElement('button');
-        preview.appendChild(previewDownloadBtn);
-        previewDownloadBtn.style.position = 'absolute';
-        previewDownloadBtn.style.backgroundColor = '#888'
-        previewDownloadBtn.style.width = '30px';
-        previewDownloadBtn.style.height = '30px';
-        previewDownloadBtn.style.borderRadius = '50%';
-        previewDownloadBtn.style.bottom = '80px';
-        previewDownloadBtn.style.margin = '0 auto';
-
-        previewDownloadBtn.addEventListener('click', () => {
-            downloadImage(imgBase64);
-        });
-
-        container.appendChild(preview);
+        guideContainer.appendChild(preview);
     }
 
     previewImg.src = imgBase64;
@@ -81,6 +68,7 @@ function connectServer() {
 window.onload = () => {
     const server = connectServer();
     captureBtn.addEventListener('click', () => {
+        captureBtn.style.backgroundColor = "#FF3333";
         server.sendCaptureMsg();
     });
 }

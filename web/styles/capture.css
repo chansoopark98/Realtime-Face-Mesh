@@ -38,7 +38,7 @@ html, body {
     width: 100%;
     height: 100%;
     margin: 0 auto;
-    background-color: #1A1A1A;
+    background-color: #222;
     overflow: hidden;
     -webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -55,6 +55,7 @@ html, body {
 
 .guide-container {
     position: absolute;
+    background-color: #222;
     display: flex;
     width: 100%;
     height: 65%;
@@ -77,8 +78,8 @@ html, body {
     color: #FFF;
     margin: 0 auto;
     font-size: 12px;
-    font-family: 'NotoSans';
-    padding-top: 8px;
+    font-family: 'NanumGothic';
+    padding-top: 10px;
 }
 
 .btn-container {
@@ -93,10 +94,10 @@ html, body {
 
 #capture-btn-outline {
     position: absolute;
-    width: 8em;
-    height: 8em;
-    background-color: #888;
-    border: 0.25em solid #888;
+    width: 7.5em;
+    height: 7.5em;
+    background-color: #CCC;
+    border: 0.2em solid #CCC;
     border-radius: 50%;
     margin: 0 auto;
     display: flex;
@@ -108,8 +109,8 @@ html, body {
 #capture-btn {
     width: 92%;
     height: 92%;
-    background-color: #888;
-    border: 0.25em solid #1A1A1A;
+    background-color: #CCC;
+    border: 0.25em solid #222;
     border-radius: 50%;
     margin: 0 auto;
 }

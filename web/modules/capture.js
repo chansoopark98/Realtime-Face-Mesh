@@ -108,8 +108,6 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
         layerList.forEach((layer) => {
             captureContext.drawImage(layer, 0, 0, layer.width, layer.height);
         });
-
-        downloadImage(captureCanvas.toDataURL('image/png', 1.0));
     
         const imgData = captureContext.getImageData(cx, cy, cw, ch);
 
