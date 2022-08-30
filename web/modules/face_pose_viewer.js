@@ -1,6 +1,6 @@
 import * as camera_util from './camera.js';
 import { visibleHandler, updateRotationAndPosition, randomModelInitialize } from './face_pose_ar.js';
-// import * as captureFunc from './capture.js'
+import * as captureFunc from './capture.js'
 
 /*
     ----------------------<<< Global variable >>>----------------------
@@ -138,8 +138,9 @@ window.onload = () => {
     // canvas.height = height;
     camera_util.getCamera(videoElement);
 
-    // const renderAR = document.querySelector('#render_ar');
+    const controller = document.querySelector('.controller');
+    const renderAR = document.querySelector('#render_ar');
     // const layer = [ canvas, renderAR ];
-    // // const layer = [ renderAR ];
-    // captureFunc.createCaptureButton(videoElement, layer, sx, sy, dx, dy);
+    const layer = [ renderAR ];
+    captureFunc.createCaptureButton(videoElement, controller, layer, sx, sy, dx, dy);
 }

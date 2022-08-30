@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Camera Test</title>
+    <title>TSPXR x WSCE2022 AR Event</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <meta http-equiv="ScreenOrientation" content="autoRotate:disabled" />
@@ -26,20 +26,19 @@
 <body>
     <div id="loading">
         <img src="./assets/logo.png" />
-        <span class="loading-text">AR Test page</span>
+        <span class="loading-text">TSPXR x WSCE2022 AR Event</span>
         <video id="video" muted playsinline autoplay></video>
         <canvas id="render_area" width="2560" height="1440"></canvas>
         <canvas id="render_ar" width="2560" height="1440"></canvas>
+        <img id="preview-frame" src="./assets/img/preview_frame.png" width="2560" height="1440">
         <canvas id="send_canvas" hidden></canvas>
-        
-        <!-- <button class="w-btn w-btn-indigo" type="button" id='model_select_button'>
-          MODEL CHANGE
-      </button> -->
-  
+
+        <div class="controller">
+          <button class="w-btn w-btn-indigo" type="button" id='model_select_button'>
+            MODEL CHANGE
+          </button>
+        </div>
     </div>
-    <button class="w-btn w-btn-indigo" type="button" id='model_select_button'>
-      MODEL CHANGE
-  </button>
 
 </body>
 </html>
