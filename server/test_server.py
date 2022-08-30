@@ -43,9 +43,9 @@ class TCPServer():
         self.prev_x = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_y = np.reshape(np.zeros(self.maximum_samples), (self.maximum_samples, 1))
         self.prev_scales = np.zeros((self.maximum_samples, 1))
-        self.sx = 640 #480
-        self.sy = 240
-        self.image_shape = (960, 1280) # H,W
+        self.sx = 480 #480
+        self.sy = 120
+        self.image_shape = (1200, 1600) # H,W
         
         self.load_model()
     
@@ -183,8 +183,8 @@ class TCPServer():
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
-        cv2.imshow('test', frame)
-        cv2.waitKey(1)
+        # cv2.imshow('test', frame)
+        # cv2.waitKey(1)
         return output
         
     async def loop_logic(self, websocket: websockets, path):
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_local', '-ul',
                                                 type=bool,
                                                 help='Launch Server Local Setting (127.0.0.1) [default : False]',
-                                                default=False)
+                                                default=True)
     
     args = parser.parse_args()
     
