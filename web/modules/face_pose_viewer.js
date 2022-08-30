@@ -1,6 +1,6 @@
 import * as camera_util from './camera.js';
 import { visibleHandler, updateRotationAndPosition, randomModelInitialize } from './face_pose_ar.js';
-// import * as captureFunc from './capture.js'
+import * as captureFunc from './capture.js'
 
 /*
     ----------------------<<< Global variable >>>----------------------
@@ -38,10 +38,10 @@ const webSocket = new WebSocket('ws://127.0.0.1:7777');
 const canvas = document.getElementById('render_area');
 canvas.width = 2560; // VideoElement width
 canvas.height = 1440; // VideoElement height
-let context = canvas.getContext('2d');
-context.strokeStyle = "#B40404";
-context.lineWidth = 6;
-context.strokeRect(sx, sy, dx, dy);
+// let context = canvas.getContext('2d');
+// context.strokeStyle = "#B40404";
+// context.lineWidth = 6;
+// context.strokeRect(sx, sy, dx, dy);
 
 // 랜덤 모델을 선택하기 위한 버튼
 const randomSelectButton = document.getElementById('model_select_button');
@@ -138,8 +138,8 @@ window.onload = () => {
     // canvas.height = height;
     camera_util.getCamera(videoElement);
 
-    // const renderAR = document.querySelector('#render_ar');
-    // // const layer = [ canvas, renderAR ];
+    const renderAR = document.querySelector('#render_ar');
+    const layer = [ canvas, renderAR ];
     // const layer = [ renderAR ];
-    // captureFunc.createCaptureButton(videoElement, layer, sx, sy, dx, dy);
+    captureFunc.createCaptureButton(videoElement, layer, sx, sy, dx, dy);
 }

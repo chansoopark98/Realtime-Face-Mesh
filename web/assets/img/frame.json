@@ -1,24 +1,46 @@
 {
     "frameImg" : {
-        "normal" : {
-            "imgSrc" : "./assets/img/normal_frame.png",
+        "white_normal_frame" : {
+            "imgSrc" : "./assets/img/white_normal_frame.png",
             "imgWidth" : 1830,
-            "imgHeight" : 1830,
+            "imgHeight" : 2079,
             "idx" : {
                 "0" : {
                     "offsetX" : 72,
-                    "offsetY" : 76
+                    "offsetY" : 70
                 }
             }
         },
-        "coffee" : {
-            "imgSrc" : "./assets/img/coffet_frame.png",
+        "white_coffee_frame" : {
+            "imgSrc" : "./assets/img/white_coffee_frame.png",
             "imgWidth" : 1830,
-            "imgHeight" : 1830,
+            "imgHeight" : 2079,
             "idx" : {
                 "0" : {
                     "offsetX" : 72,
-                    "offsetY" : 76
+                    "offsetY" : 70
+                }
+            }
+        },
+        "black_normal_frame" : {
+            "imgSrc" : "./assets/img/black_normal_frame.png",
+            "imgWidth" : 1830,
+            "imgHeight" : 2079,
+            "idx" : {
+                "0" : {
+                    "offsetX" : 72,
+                    "offsetY" : 70
+                }
+            }
+        },
+        "black_coffee_frame" : {
+            "imgSrc" : "./assets/img/black_coffee_frame.png",
+            "imgWidth" : 1830,
+            "imgHeight" : 2079,
+            "idx" : {
+                "0" : {
+                    "offsetX" : 72,
+                    "offsetY" : 70
                 }
             }
         }

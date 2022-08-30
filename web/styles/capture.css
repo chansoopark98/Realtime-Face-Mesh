@@ -1,8 +1,44 @@
+@font-face {
+	font-family: "NanumGothic";
+	src: url("../assets/fonts/NanumGothic.svg#NanumGothic") format("svg"),
+		url("../assets/fonts/NanumGothic.ttf") format("truetype"),
+		url("../assets/fonts/NanumGothic.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "NanumGothicExtraBold";
+	src: url("../assets/fonts/NanumGothicExtraBold.svg#NanumGothicExtraBold") format("svg"),
+		url("../assets/fonts/NanumGothicExtraBold.ttf") format("truetype"),
+		url("../assets/fonts/NanumGothicExtraBold.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "NotoSans";
+	src: url("../assets/fonts/NotoSansKR-Bold-Alphabetic.svg#NotoSansKR-Bold-Alphabetic") format("svg"),
+		url("../assets/fonts/NotoSansKR-Bold-Alphabetic.ttf") format("truetype"),
+		url("../assets/fonts/NotoSansKR-Bold-Alphabetic.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "NanumSquare";
+	src: url("../assets/fonts/NanumSquareEB.svg#NanumSquareEB") format("svg"),
+		url("../assets/fonts/NanumSquareEB.ttf") format("truetype"),
+		url("../assets/fonts/NanumSquareEB.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+
 html, body {
     width: 100%;
     height: 100%;
     margin: 0 auto;
-    background-color: black;
+    background-color: #1A1A1A;
     overflow: hidden;
     -webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -10,26 +46,70 @@ html, body {
 }
 
 .container {
+    position: absolute;
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
 }
 
-#capture-btn {
+.guide-container {
     position: absolute;
-    width: 15em;
-    height: 15em;
-    background-color: #333;
-    border: 1em solid #555;
-    border-radius: 50%;
+    display: flex;
+    width: 100%;
+    height: 65%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    top: 0;
+}
+
+.guide {
+    position: absolute;
+}
+
+.guide-container #logo {
+    width: 35%;
+}
+
+.guide-container p {
+    color: #FFF;
+    margin: 0 auto;
+    font-size: 12px;
+    font-family: 'NotoSans';
+    padding-top: 8px;
+}
+
+.btn-container {
+    position: absolute;
+    width: 100%;
+    height: 35%;
     display: flex;
     justify-content: center;
     align-items: center;
+    bottom: 0;
 }
 
-#capture-btn p {
-    color: #eee;
-    font-size: 3em;
+#capture-btn-outline {
+    position: absolute;
+    width: 8em;
+    height: 8em;
+    background-color: #888;
+    border: 0.25em solid #888;
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+#capture-btn {
+    width: 92%;
+    height: 92%;
+    background-color: #888;
+    border: 0.25em solid #1A1A1A;
+    border-radius: 50%;
+    margin: 0 auto;
 }

@@ -42,6 +42,7 @@ const GET_IMAGE_FLAG = '$$GETIMG';
 const CAMERA_SERVER_FLAG = '$$CAM_SERVER';
 const CLIENT_FLAG = '$$CLIENT';
 const SEND_IMAGE_FLAG = '$$SENDIMG';
+
 const clients = new Map();
 let camServer = null;
 
@@ -51,22 +52,24 @@ wss.on('connection', (ws, req) => {
   const clientId = `${clientAddress}:${clientPort}`;
 
   ws.on('message', (msg) => {
-    const data = JSON.parse(msg);
-    console.log(data)
+    const jsonData = JSON.parse(msg);
+    // console.log(jsonData)
 
-    if (data == CAMERA_SERVER_FLAG) {
-      camServer = {ws, clientId};
-    }
-    else if (data == CLIENT_FLAG) {
-      clients.set(ws, clientId);
-    }
-    else if (data == GET_IMAGE_FLAG) {
-      camServer.ws.send(GET_IMAGE_FLAG);
-    }
-    else {
-      [...clients.keys()].forEach((client) => {
-        client.send(data);
-      });
+    switch(jsonData.flag) {
+      case CAMERA_SERVER_FLAG:
+        camServer = {ws, clientId};
+        break;
+      case CLIENT_FLAG:
+        clients.set(ws, clientId);
+        break;
+      case GET_IMAGE_FLAG:
+        camServer.ws.send(GET_IMAGE_FLAG);
+        break;
+      case SEND_IMAGE_FLAG:
+        [...clients.keys()].forEach((client) => {
+          client.send(jsonData.data);
+        });
+        break;
     }
   });
 
