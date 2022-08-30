@@ -12,20 +12,23 @@ const frameConfigPath = './assets/img/frame.json';
 let frameConfig = null;
 let captureButton = null;
 
-function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch) {
+function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
     const wss = new WebSocket('wss://127.0.0.1:5503');
 
     wss.onmessage = (msg) => {
         const data = msg.data;
 
         if (data == flag.GET_IMAGE_FLAG) {
-            const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
-            getFrame([ capturedImage ]).then((imgBase64) => {
-                console.log(imgBase64)
-                wss.send(JSON.stringify({
-                    'flag' : flag.SEND_IMAGE_FLAG,
-                    'data' : imgBase64
-                }));
+            effect.countDown().then(() => {
+                effect.playEffect().then(() => {
+                    const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
+                    getFrame([ capturedImage ]).then((imgBase64) => {
+                        wss.send(JSON.stringify({
+                            'flag' : flag.SEND_IMAGE_FLAG,
+                            'data' : imgBase64
+                        }));
+                    });
+                })
             });
         }
     };
@@ -43,11 +46,7 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch) {
         console.log('error occured! failed to connect server.')
     };
 
-    return{
-        sendCaptureMsg: () => {
-            wss.send(JSON.stringify({ 'flag' : flag.GET_IMAGE_FLAG }));
-        }
-    } 
+    return wss;
 }
 
 function getCurrentDate() {
@@ -108,8 +107,6 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
         layerList.forEach((layer) => {
             captureContext.drawImage(layer, 0, 0, layer.width, layer.height);
         });
-
-        downloadImage(captureCanvas.toDataURL('image/png', 1.0));
     
         const imgData = captureContext.getImageData(cx, cy, cw, ch);
 
@@ -129,6 +126,7 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
 }
 
 function createCaptureButton(videoElement,
+                                                            containerElement,
                                                             layerList,
                                                             cx=0, cy=0, cw=0, ch=0,
                                                             buttonElement=null) {
@@ -137,25 +135,204 @@ function createCaptureButton(videoElement,
             captureButton = buttonElement;
         } else {
             captureButton = document.createElement('div');
+            captureButton.id = 'capture-btn';
             captureButton.style.position = 'absolute';
             captureButton.style.backgroundColor = '#FF0000';
             captureButton.style.width = '30px';
             captureButton.style.height = '30px';
             captureButton.style.borderRadius = '30px';
             captureButton.style.margin = '10px';
-            captureButton.style.zIndex = '9999999';
-            document.body.appendChild(captureButton);
+            captureButton.style.top = 0;
+            captureButton.style.left = 0;
+            captureButton.style.zIndex = '1000';
+            containerElement.prepend(captureButton);
         }
     }
 
+    const effect = createCaptureEffect(containerElement);
+    const server = connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect);
     getFrameInfo();
-    connectCaptureServer(videoElement, layerList, cx, cy, cw, ch);
 
     captureButton.addEventListener('click', (event) => {
-        const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
-        getFrame([ capturedImage ]);
+        effect.playEffect().then(() => {
+            const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
+            getFrame([ capturedImage ]).then((imgBase64) => {
+                server.send(JSON.stringify({
+                    'flag' : flag.SEND_IMAGE_FLAG,
+                    'data' : imgBase64
+                }));
+            });
+        })
         //downloadImage(capturedImage.imgURL);
     });
+}
+
+function createCaptureEffect(containerElement) {
+    let captureEffectCanvas = document.querySelector('#capture-effect');
+
+    if (!captureEffectCanvas) {
+        captureEffectCanvas = document.createElement('canvas');
+        captureEffectCanvas.id = 'capture-effect';
+        captureEffectCanvas.style.position = 'absolute';
+        captureEffectCanvas.style.zIndex = '1000';
+        captureEffectCanvas.style.display = 'none';
+        const captureEffectContext = captureEffectCanvas.getContext('2d');
+        const triangleCanvas = document.createElement('canvas');
+        const triangleContext = triangleCanvas.getContext('2d');
+        const polygon_sides = 10;
+        const vertices = Array(polygon_sides).fill(null);
+        const angle_increment = Math.PI * 2 / polygon_sides;
+        const exterior_angle = angle_increment;
+
+        const count = document.createElement('div');
+        count.style.position = 'absolute';
+        count.style.width = '100%';
+        count.style.height = '100%';
+        count.style.color = '#FFF'
+        count.style.display = 'none';
+        count.style.justifyContent = 'center';
+        count.style.alignItems = 'center';
+        count.style.textAlign = 'center';
+        count.style.fontSize = '15em';
+    
+        let center_x;
+        let center_y;
+        let radius = 100;
+        let longestSide;
+    
+        const setVertices = () => {
+            for (let i = 0; i < polygon_sides; i++) {
+                const x = center_x + radius * Math.cos(angle_increment * i);
+                const y = center_y - radius * Math.sin(angle_increment * i);
+                
+                vertices[i] = { x, y };
+            }
+        }
+    
+        const updateTriangle = () => {
+            const gradient = triangleContext.createLinearGradient(0, 0, triangleCanvas.width, 0);
+            gradient.addColorStop(0, '#222');
+            gradient.addColorStop(0.3, '#000');
+            triangleContext.fillStyle = gradient;
+            
+            triangleContext.strokeStyle = '#444';
+            
+            triangleContext.clearRect(0, 0, triangleCanvas.width, triangleCanvas.height);
+            
+            triangleContext.moveTo(0, 0);
+            triangleContext.lineTo(triangleCanvas.width, 0);
+            triangleContext.lineTo(
+                triangleCanvas.width * Math.cos(exterior_angle),
+                triangleCanvas.height * Math.sin(exterior_angle)
+            );
+            triangleContext.closePath();
+            triangleContext.fill();
+            triangleContext.stroke();
+        }
+    
+        const placeTriangle = (vertex, i) => {  
+            captureEffectContext.save();
+            captureEffectContext.translate(vertex.x, vertex.y);
+            captureEffectContext.rotate(-Math.PI / 2 - exterior_angle / 2 - exterior_angle * i);
+            captureEffectContext.drawImage(triangleCanvas, 0, 0);
+            captureEffectContext.restore();
+        }
+    
+        const draw = () => {
+            captureEffectContext.clearRect(0, 0, captureEffectCanvas.width, captureEffectCanvas.height);
+            
+            vertices.forEach((vertex, i) => {
+                placeTriangle(vertex, i);
+            });
+        }
+    
+        const setSize = () => {
+            captureEffectCanvas.width = window.innerWidth;
+            captureEffectCanvas.height = window.innerHeight;
+            center_x = captureEffectCanvas.width / 2;
+            center_y = captureEffectCanvas.height / 2;
+            longestSide = Math.max(captureEffectCanvas.width, captureEffectCanvas.height);
+            triangleCanvas.width = longestSide;
+            triangleCanvas.height = longestSide;
+            updateTriangle();
+        }
+    
+        const playEffect = () => {
+            return new Promise((resolve) => {
+                const width = captureEffectCanvas.width;
+                const step = 50;
+                let current = width;
+    
+                radius = width;
+                setVertices();
+                draw();
+    
+                captureEffectCanvas.style.display = 'block';
+    
+                const closeEffect = setInterval(() => {
+                    if (current <= 0) {
+                        clearInterval(closeEffect);
+    
+                        current = 0;
+    
+                        const openEffect = setInterval(() => {
+                            if (current >= width) {
+                                clearInterval(openEffect);        
+                                captureEffectCanvas.style.display = 'none';
+                                resolve();
+                            }
+            
+                            radius = current * 0.75 <= width ? current * 0.75 : width;
+            
+                            setVertices();
+                            draw();
+                            current += step;
+                        }, 1)
+                    }
+    
+                    radius = current * 0.75 >= 0 ? current * 0.75 : 0;
+    
+                    setVertices();
+                    draw();
+                    current -= step;
+                }, 1);
+            })
+        }
+
+        const countDown = (time=3) => {
+            return new Promise((resolve) => {
+                count.style.display = 'flex';
+                const start = setInterval(() => {
+                    if (time < 1) {
+                        clearInterval(start);
+                        count.innerHTML = '';
+                        count.style.display = 'none';
+                        resolve();
+                    }
+                    count.innerHTML = String(time);
+                    time -= 1;
+                }, 1000);
+            });
+        }
+
+        const init = () => {
+            setSize();
+            setVertices();
+            draw();
+    
+            containerElement.prepend(count);
+            containerElement.prepend(captureEffectCanvas);
+        
+            window.addEventListener('resize', () => {
+                setSize();
+                setVertices();
+                draw();
+            });
+        }
+
+        init();
+        return { 'playEffect': playEffect, 'countDown': countDown };
+    }
 }
 
 function getFrame(imgList, mode='white_normal_frame') {

@@ -152,11 +152,19 @@ html, body {
 	height: 10%;
 } */
 
-button {
+.controller {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+.controller button {
 	position: absolute;
     margin: 20px;
+	bottom: 50px;
 	z-index: 2000;
-	bottom: 50px,
 }
 
 .w-btn {
