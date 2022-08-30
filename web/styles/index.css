@@ -24,6 +24,7 @@
 	font-weight: normal;
 	font-style: normal;
 } */
+@import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
 
 html, body {
 	margin: 0 auto;
@@ -118,12 +119,47 @@ html, body {
 }
 
 
-button {
-	/* margin-right: 5rem; */
+/* button {
+	margin-right: 5rem;
 	position: relative;
-	/* top: 1000px; */
-	/* left: 150px; */
+	top: 1000px;
+	left: 150px;
 	z-index: 102;
 	width: 50%;
 	height: 10%;
+} */
+
+button {
+	position: absolute;
+    margin: 20px;
+	z-index: 102;
+	top: 1100px;
+}
+
+.w-btn {
+    position: absolute;
+    border: none;
+    display: inline-block;
+    padding: 15px 30px;
+    border-radius: 15px;
+    font-family: "paybooc-Light", sans-serif;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s;
+}
+.w-btn-outline {
+    position: absolute;
+    padding: 15px 30px;
+    border-radius: 15px;
+    font-family: "paybooc-Light", sans-serif;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.w-btn-indigo {
+    background-color: aliceblue;
+    color: #1e6b7b;
 }

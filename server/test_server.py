@@ -137,6 +137,8 @@ class TCPServer():
   
                 vector = np.add.reduce(test_scale) - abs(angle_filtered[idx, 2] * width)
 
+                
+
                 cx = int(x_min + (width / 2)) + self.sx
                 cy = int(y_min + (height / 2)) + self.sy
 
@@ -148,7 +150,7 @@ class TCPServer():
                 
                 norm_scale = vector / self.image_shape[1]
                 
-                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.01:
+                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.03:
                     self.prev_scales[idx, 0] = norm_scale
                 
                 center_x = str(round(self.prev_x[idx, 0])) + ','
