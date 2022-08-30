@@ -80,12 +80,16 @@ class TCPServer():
         # Face detection
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
-        # TODO : Cut off by boxes scale
+        # Cut off by boxes scale
         box_cut_off = 100
         condition = (boxes[:, 2] - boxes[:, 0]) > box_cut_off
         mask = np.where(condition, True, False)
-        print(mask, boxes[:, 2] - boxes[:, 0])
         boxes = boxes[mask]
+
+        # Clip by maximum samples
+        n_boxes = boxes.shape[0]
+        if n_boxes >= self.maximum_samples:
+            boxes = boxes[:self.maximum_samples]
 
         # Facial landmark를 계산하기 위해 frame image 복사
         feed = frame.copy()
@@ -123,8 +127,8 @@ class TCPServer():
             if number_samples > self.maximum_samples:
                 number_samples = self.maximum_samples
             
-            # Limit the number of detected faces
-            boxes = boxes[:number_samples]
+            # # Limit the number of detected faces
+            # boxes = boxes[:number_samples]
 
             # Calculate angle by LPF
             zero_angle = np.zeros((self.maximum_samples, 3))
@@ -146,7 +150,7 @@ class TCPServer():
                 height = y_max - y_min
 
                 """ Calculate object's scale """
-                # 3x3 rotation matrix convert to absolute
+                # 3x3 rotation matrix convert to absolute (python list to numpy array)
                 rotate_matrix = np.absolute(rotate_matrix)
                 
                 # Converts it to x, y, z vectors using the object's width and height values.
