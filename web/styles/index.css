@@ -92,6 +92,18 @@ html, body {
 	
 }
 
+#render_area {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 100;
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+	
+}
+
 #render_ar {
 	position: absolute;
 	left: 0;
@@ -102,6 +114,17 @@ html, body {
 	height: 100% !important;
 	object-fit: cover;
 	
+}
+
+#preview-frame {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 102;
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
 }
 
 #send_canvas {
@@ -116,7 +139,6 @@ html, body {
 	visibility: hidden;
 	
 }
-
 
 button {
 	/* margin-right: 5rem; */

@@ -9,10 +9,11 @@ sudo npm install package_name
     sudo npm install express
     sudo npm install cors --save
     sudo npm install ejs
+    sudo npm install ws
     sudo npm install three
 
 
-threejs 설치 안될때
+threejs 설치 안될때 (현재 패키지내에 포함됨)
 
 1. sudo npm cache clean
 2. sudo npm install -g n

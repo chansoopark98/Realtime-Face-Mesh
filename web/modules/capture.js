@@ -4,11 +4,11 @@
  *  Capture function for augmented reality (video/canvas element)
  */
 
-const CAMERA_SERVER_FLAG = '$$CAM_SERVER';
-const GET_IMAGE_FLAG = '$$GETIMG';
+import { flag } from './server.flags.js';
+
 const captureCanvas = document.createElement('canvas');
 const captureContext = captureCanvas.getContext('2d');
-const frameConfigPath = "./assets/img/frame.json";
+const frameConfigPath = './assets/img/frame.json';
 let frameConfig = null;
 let captureButton = null;
 
@@ -18,32 +18,34 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch) {
     wss.onmessage = (msg) => {
         const data = msg.data;
 
-        if (data == GET_IMAGE_FLAG) {
+        if (data == flag.GET_IMAGE_FLAG) {
             const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
-            const imgBase64 = getFrame([ capturedImage ]);
-            console.log(imgBase64)
-            wss.send(imgBase64);
+            getFrame([ capturedImage ]).then((imgBase64) => {
+                console.log(imgBase64)
+                wss.send(JSON.stringify({
+                    'flag' : flag.SEND_IMAGE_FLAG,
+                    'data' : imgBase64
+                }));
+            });
         }
     };
 
     wss.onopen = () => {
-        wss.send(JSON.stringify(CAMERA_SERVER_FLAG));
-        console.log("connect successfully!");
+        wss.send(JSON.stringify({ 'flag' : flag.CAMERA_SERVER_FLAG }));
+        console.log('connect successfully!');
     };
 
     wss.onclose = () => {
-        console.log("disconneted")
-        reject(false);
+        console.log('disconneted')
     };
 
     wss.onerror = () => {
-        console.log("error occured! failed to connect server.")
-        reject(false);
+        console.log('error occured! failed to connect server.')
     };
 
     return{
         sendCaptureMsg: () => {
-            wss.send(JSON.stringify(GET_IMAGE_FLAG));
+            wss.send(JSON.stringify({ 'flag' : flag.GET_IMAGE_FLAG }));
         }
     } 
 }
@@ -63,8 +65,8 @@ function getCurrentDate() {
 
 function getFrameInfo() {
     const request = new XMLHttpRequest();
-    request.open("GET", frameConfigPath);
-    request.responseType = "json";
+    request.open('GET', frameConfigPath);
+    request.responseType = 'json';
     request.send();
     request.onload = () => {
         frameConfig = request.response;
@@ -106,6 +108,8 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
         layerList.forEach((layer) => {
             captureContext.drawImage(layer, 0, 0, layer.width, layer.height);
         });
+
+        downloadImage(captureCanvas.toDataURL('image/png', 1.0));
     
         const imgData = captureContext.getImageData(cx, cy, cw, ch);
 
@@ -154,54 +158,56 @@ function createCaptureButton(videoElement,
     });
 }
 
-function getFrame(imgList, mode='normal') {
-    const imageCanvas = document.createElement('canvas');
-    const imageContext = imageCanvas.getContext('2d');
-
-    const tmpCanvas = document.createElement('canvas');
-    const tmpContext = tmpCanvas.getContext('2d');
-
-    const frameCanvas = document.createElement('canvas');
-    const frameContext = frameCanvas.getContext('2d');
-
-    const config = frameConfig.frameImg;
-    const frameSrc = config[mode].imgSrc;
-    const frameWidth = config[mode].imgWidth;
-    const frameHeight = config[mode].imgHeight;
-    const frameImg = new Image();
-
-    frameImg.onload = () => {
-        frameCanvas.width = frameWidth;
-        frameCanvas.height = frameHeight;
-
-        Object.keys(config[mode].idx).forEach((id) => {
-            const ox = config[mode].idx[id].offsetX;
-            const oy = config[mode].idx[id].offsetY;
-            const img = imgList[0].data;
-
-            const rw = frameWidth - (ox * 2);
-            const rh = rw * (img.height / img.width);
-
-            tmpCanvas.width = img.width;
-            tmpCanvas.height = img.height;
-            tmpContext.putImageData(img, 0, 0);
-
-            imageCanvas.width = rw;
-            imageCanvas.height = rh;
-            imageContext.drawImage(tmpCanvas, 0, 0, img.width, img.height, 0, 0, rw, rh);
-            const imgData = imageContext.getImageData(0, 0, rw, rh);
-
-            createImageBitmap(imgData).then((imgBitmap) => {
-                frameContext.drawImage(imgBitmap, ox, oy, rw, rh);
-                frameContext.drawImage(frameImg, 0, 0, frameWidth, frameHeight);
-                const imgBase64 = frameCanvas.toDataURL('image/png', 1.0);
-                downloadImage(imgBase64);
-                return imgBase64;
-            })
-        });
-    }
-
-    frameImg.src = frameSrc;
+function getFrame(imgList, mode='white_normal_frame') {
+    return new Promise((resolve, reject) => {
+        const imageCanvas = document.createElement('canvas');
+        const imageContext = imageCanvas.getContext('2d');
+    
+        const tmpCanvas = document.createElement('canvas');
+        const tmpContext = tmpCanvas.getContext('2d');
+    
+        const frameCanvas = document.createElement('canvas');
+        const frameContext = frameCanvas.getContext('2d');
+    
+        const config = frameConfig.frameImg;
+        const frameSrc = config[mode].imgSrc;
+        const frameWidth = config[mode].imgWidth;
+        const frameHeight = config[mode].imgHeight;
+        const frameImg = new Image();
+    
+        frameImg.onload = () => {
+            frameCanvas.width = frameWidth;
+            frameCanvas.height = frameHeight;
+    
+            Object.keys(config[mode].idx).forEach((id) => {
+                const ox = config[mode].idx[id].offsetX;
+                const oy = config[mode].idx[id].offsetY;
+                const img = imgList[0].data;
+    
+                const rw = frameWidth - (ox * 2);
+                const rh = rw * (img.height / img.width);
+    
+                tmpCanvas.width = img.width;
+                tmpCanvas.height = img.height;
+                tmpContext.putImageData(img, 0, 0);
+    
+                imageCanvas.width = rw;
+                imageCanvas.height = rh;
+                imageContext.drawImage(tmpCanvas, 0, 0, img.width, img.height, 0, 0, rw, rh);
+                const imgData = imageContext.getImageData(0, 0, rw, rh);
+    
+                createImageBitmap(imgData).then((imgBitmap) => {
+                    frameContext.drawImage(imgBitmap, ox, oy, rw, rh);
+                    frameContext.drawImage(frameImg, 0, 0, frameWidth, frameHeight);
+                    const imgBase64 = frameCanvas.toDataURL('image/png', 1.0);
+                    // downloadImage(imgBase64);
+                    resolve(imgBase64);
+                })
+            });
+        }
+    
+        frameImg.src = frameSrc;
+    });
 }
 
 export { getCaptureImage, downloadImage, createCaptureButton }
