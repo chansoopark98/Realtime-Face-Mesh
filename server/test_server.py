@@ -80,6 +80,13 @@ class TCPServer():
         # Face detection
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
+        # TODO : Cut off by boxes scale
+        box_cut_off = 100
+        condition = (boxes[:, 2] - boxes[:, 0]) > box_cut_off
+        mask = np.where(condition, True, False)
+        print(mask, boxes[:, 2] - boxes[:, 0])
+        boxes = boxes[mask]
+
         # Facial landmark를 계산하기 위해 frame image 복사
         feed = frame.copy()
 
@@ -158,7 +165,8 @@ class TCPServer():
                    the frame received through the Websocket"""
                 cx = int(x_min + (width / 2)) + self.sx
                 cy = int(y_min + (height / 2)) + self.sy
-
+                
+                
                 """ Clipping by comparing the difference with the previous result """
                 # Clip x
                 if abs(self.prev_x[idx, 0] - cx) > 5:
@@ -235,7 +243,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_local', '-ul',
                                                 type=bool,
                                                 help='Launch Server Local Setting (127.0.0.1) [default : False]',
-                                                default=True)
+                                                default=False)
     
     args = parser.parse_args()
     
