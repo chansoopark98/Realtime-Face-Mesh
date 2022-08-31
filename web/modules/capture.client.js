@@ -43,7 +43,7 @@ function setPreviewLayer(imgBase64) {
 }
 
 function connectServer() {
-    const wss = new WebSocket('wss://192.168.0.43:5503');
+    const wss = new WebSocket('wss://ar.tsp-xr.com:5503');
 
     wss.onmessage = (msg) => {
         const imgBase64 = msg.data;

@@ -82,8 +82,8 @@ class TCPServer():
         
         # Cut off by boxes scale
         box_cut_off = 100
-        condition = (boxes[:, 2] - boxes[:, 0]) > box_cut_off
-        # print(boxes[:, 2] - boxes[:, 0])
+        condition = ((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])) > box_cut_off
+        print((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]))
         mask = np.where(condition, True, False)
         boxes = boxes[mask]
 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_local', '-ul',
                                                 type=bool,
                                                 help='Launch Server Local Setting (127.0.0.1) [default : False]',
-                                                default=True)
+                                                default=False)
     
     args = parser.parse_args()
     
