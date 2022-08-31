@@ -12,12 +12,17 @@ const frameConfigPath = './assets/img/frame.json';
 let frameConfig = null;
 let captureButton = null;
 
+let wss = null;
+let coffeeNum = 0;
+let frameType = 'white';
+let previousImage = null;
+
 function random() {
     const seed = parseInt(Math.random() * 10);
 
     console.log(seed);
     
-    if (seed > 8) {
+    if (seed % 3 == 0) {
         return 'coffee';
     }
     else {
@@ -31,29 +36,38 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
     let coffeeNum = 0;
 
     wss.onmessage = (msg) => {
-        const data = JSON.parse(msg.data);
+        const jsonData = JSON.parse(msg.data);
 
-        if (data.flag == flag.GET_IMAGE_FLAG) {
-            coffeeNum = parseInt(data.num);
-            let eventResult = 'coffee';
-
-            effect.countDown().then(() => {
-                effect.playEffect().then(() => {
-                    const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
-                    
-                    // if (coffeeNum > 0) {
-                    //     eventResult = random();
-                    // }
-
-                    getFrame([ capturedImage ], eventResult).then((imgBase64) => {
-                        wss.send(JSON.stringify({
-                            'flag' : flag.SEND_IMAGE_FLAG,
-                            'data' : imgBase64,
-                            'num' : coffeeNum
-                        }));
-                    });
-                })
-            });
+        switch(jsonData.flag){
+            case flag.GET_IMAGE_FLAG:
+                coffeeNum = parseInt(data.num);
+                let eventResult = 'coffee';
+    
+                effect.countDown().then(() => {
+                    effect.playEffect().then(() => {
+                        const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
+                        
+                        if (coffeeNum > 0) {
+                            eventResult = random();
+                        }
+    
+                        getFrame([ capturedImage ], eventResult).then((imgBase64) => {
+                            previousImage = imgBase64;
+                            wss.send(JSON.stringify({
+                                'flag' : flag.SEND_IMAGE_FLAG,
+                                'data' : imgBase64,
+                                'num' : coffeeNum
+                            }));
+                        });
+                    })
+                });
+                break;
+            case flag.CHANGE_FRAME_FLAG:
+                frameType = jsonData.data;
+                break;
+            case flag.CHANGE_MODEL_FLAG:
+                window.changeModel();
+                break;
         }
     };
 
@@ -71,6 +85,14 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
     };
 
     return wss;
+}
+
+function sendImage() {
+    wss.send(JSON.stringify({
+        'flag' : flag.SEND_IMAGE_FLAG,
+        'data' : imgBase64,
+        'num' : coffeeNum
+    }));
 }
 
 function getCurrentDate() {
@@ -219,6 +241,7 @@ function createCaptureEffect(containerElement) {
         count.style.alignItems = 'center';
         count.style.textAlign = 'center';
         count.style.fontSize = '15em';
+        count.style.zIndex = '9999';
     
         let center_x;
         let center_y;
@@ -327,6 +350,7 @@ function createCaptureEffect(containerElement) {
         const countDown = (time=3) => {
             count.innerHTML = String(time);
             let current = time;
+
             return new Promise((resolve) => {
                 count.style.display = 'flex';
                 const start = setInterval(() => {
@@ -363,7 +387,7 @@ function createCaptureEffect(containerElement) {
 }
 
 function getFrame(imgList, eventResult) {
-    let mode = `white_${eventResult}_frame`;
+    let mode = `${frameType}_${eventResult}_frame`;
 
     return new Promise((resolve, reject) => {
         const imageCanvas = document.createElement('canvas');
