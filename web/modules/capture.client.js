@@ -29,11 +29,7 @@ function setPreviewLayer(imgBase64) {
         
         previewImg.onload = () => {
             clickFunc = () => {
-                downloadIcon.onload =() => {
-                    captureBtn.style.backgroundColor = '#FFF';
-                    downloadImage(imgBase64);
-                    captureBtn.style.backgroundColor = '#CCC';
-                }
+                downloadImage(imgBase64);
             }
             captureBtn.style.backgroundColor = '#CCC';
             preview.style.display = 'flex';

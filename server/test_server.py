@@ -81,9 +81,9 @@ class TCPServer():
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
         # Cut off by boxes scale
-        box_cut_off = 80
+        box_cut_off = 30
         condition = (boxes[:, 2] - boxes[:, 0]) > box_cut_off
-        print(boxes[:, 2] - boxes[:, 0])
+        # print(boxes[:, 2] - boxes[:, 0])
         mask = np.where(condition, True, False)
         boxes = boxes[mask]
 
@@ -174,16 +174,16 @@ class TCPServer():
                 
                 """ Clipping by comparing the difference with the previous result """
                 # Clip x
-                if abs(self.prev_x[idx, 0] - cx) > 5:
+                if abs(self.prev_x[idx, 0] - cx) > 10:
                     self.prev_x[idx, 0] = cx
 
                 # Clip y
-                if abs(self.prev_y[idx, 0] - cy) > 5:
+                if abs(self.prev_y[idx, 0] - cy) > 10:
                     self.prev_y[idx, 0] = cy
 
                 # Clip scale
                 norm_scale = vector / self.image_shape[1]
-                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.03:
+                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.04:
                     self.prev_scales[idx, 0] = norm_scale
                 
                 """ Convert detection results (center x, y, angles, scale) to string """
@@ -222,9 +222,9 @@ class TCPServer():
             self.ssl_context.load_cert_chain(certfile=self.cert_dir, keyfile=self.key_dir, password=self.password)
         self.start_server = websockets.serve(self.loop_logic,
                                             port=self.port, ssl=self.ssl_context,
-                                            max_size=262144,
+                                            max_size=402144,
                                             max_queue=8,
-                                            read_limit=2**18,
+                                            read_limit=2**20,
                                             write_limit=2**8)
         asyncio.get_event_loop().run_until_complete(self.start_server)
         asyncio.get_event_loop().run_forever()
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_local', '-ul',
                                                 type=bool,
                                                 help='Launch Server Local Setting (127.0.0.1) [default : False]',
-                                                default=False)
+                                                default=True)
     
     args = parser.parse_args()
     

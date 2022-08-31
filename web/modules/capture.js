@@ -13,8 +13,11 @@ let frameConfig = null;
 let captureButton = null;
 
 function random() {
-    const seed = Math.random();
-    if (seed > 0.75) {
+    const seed = parseInt(Math.random() * 10);
+
+    console.log(seed);
+    
+    if (seed > 8) {
         return 'coffee';
     }
     else {
@@ -23,7 +26,8 @@ function random() {
 }
 
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
-    const wss = new WebSocket('wss://127.0.0.1:5503');
+    // const wss = new WebSocket('wss://ar.tsp-xr.com:5503');
+    const wss = new WebSocket('wss://192.168.0.43:5503');
     let coffeeNum = 0;
 
     wss.onmessage = (msg) => {
@@ -31,15 +35,15 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
 
         if (data.flag == flag.GET_IMAGE_FLAG) {
             coffeeNum = parseInt(data.num);
-            let eventResult = 'normal';
+            let eventResult = 'coffee';
 
             effect.countDown().then(() => {
                 effect.playEffect().then(() => {
                     const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
                     
-                    if (coffeeNum > 0) {
-                        eventResult = random();
-                    }
+                    // if (coffeeNum > 0) {
+                    //     eventResult = random();
+                    // }
 
                     getFrame([ capturedImage ], eventResult).then((imgBase64) => {
                         wss.send(JSON.stringify({
@@ -104,6 +108,7 @@ function downloadImage(imageURL, imageName=null) {
         link.download = `${getCurrentDate()}.png`;
     }
     link.href = dataURL;
+    console.log(link)
     link.click();
 }
 
@@ -320,17 +325,19 @@ function createCaptureEffect(containerElement) {
         }
 
         const countDown = (time=3) => {
+            count.innerHTML = String(time);
+            let current = time;
             return new Promise((resolve) => {
                 count.style.display = 'flex';
                 const start = setInterval(() => {
-                    if (time < 1) {
+                    if (current < 1) {
                         clearInterval(start);
-                        count.innerHTML = '';
                         count.style.display = 'none';
+                        count.innerHTML = String(time);
                         resolve();
                     }
-                    count.innerHTML = String(time);
-                    time -= 1;
+                    count.innerHTML = String(current);
+                    current -= 1;
                 }, 1000);
             });
         }
