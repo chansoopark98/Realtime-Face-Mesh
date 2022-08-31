@@ -46,13 +46,19 @@ function connectServer() {
     const wss = new WebSocket('wss://ar.tsp-xr.com:5503');
 
     wss.onmessage = (msg) => {
-        const imgBase64 = msg.data;
+        const jsonData = JSON.parse(msg.data);
 
-        setPreviewLayer(imgBase64);
+        switch(jsonData.flag) {
+            case flag.SEND_IMAGE_FLAG:
+                setPreviewLayer(jsonData.data);
+                break;
+        }
     };
 
     wss.onopen = () => {
-        wss.send(JSON.stringify({ 'flag' : flag.CLIENT_FLAG }));
+        wss.send(JSON.stringify({
+            'flag' : flag.CLIENT_FLAG
+        }));
         console.log('connect successfully!');
     };
 
@@ -66,7 +72,20 @@ function connectServer() {
 
     return {
         sendCaptureMsg: () => {
-            wss.send(JSON.stringify({ 'flag' : flag.GET_IMAGE_FLAG }));
+            wss.send(JSON.stringify({
+                'flag' : flag.GET_IMAGE_FLAG
+            }));
+        },
+        changeFrameMsg: (frameType) => {
+            wss.send(JSON.stringify({
+                'flag' : flag.CHANGE_FRAME_FLAG,
+                'data': frameType
+            }));
+        },
+        changeModelMsg: () => {
+            wss.send(JSON.stringify({
+                'flag' : flag.CHANGE_MODEL_FLAG,
+            }));
         }
     } 
 }
