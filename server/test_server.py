@@ -81,7 +81,7 @@ class TCPServer():
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
         # Cut off by boxes scale
-        box_cut_off = 30
+        box_cut_off = 100
         condition = (boxes[:, 2] - boxes[:, 0]) > box_cut_off
         # print(boxes[:, 2] - boxes[:, 0])
         mask = np.where(condition, True, False)
@@ -183,7 +183,7 @@ class TCPServer():
 
                 # Clip scale
                 norm_scale = vector / self.image_shape[1]
-                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.04:
+                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.1:
                     self.prev_scales[idx, 0] = norm_scale
                 
                 """ Convert detection results (center x, y, angles, scale) to string """
