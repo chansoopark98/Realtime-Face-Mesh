@@ -3,8 +3,10 @@ import { downloadImage } from './capture.js'
 
 const guideContainer = document.querySelector('.guide-container');
 const captureBtn = document.querySelector('#capture-btn');
+const downloadIcon = document.querySelector('#download-icon');
 let preview = null;
 let previewImg = null;
+let clickFunc = null;
 
 
 function setPreviewLayer(imgBase64) {
@@ -22,12 +24,20 @@ function setPreviewLayer(imgBase64) {
         previewImg = new Image();
         preview.appendChild(previewImg);
         previewImg.style.position = 'absolute';
-        previewImg.style.width = '95%';
+        //previewImg.style.width = '95%';
         previewImg.style.height = '95%';
         
         previewImg.onload = () => {
+            clickFunc = () => {
+                downloadIcon.onload =() => {
+                    captureBtn.style.backgroundColor = '#FFF';
+                    downloadImage(imgBase64);
+                    captureBtn.style.backgroundColor = '#CCC';
+                }
+            }
             captureBtn.style.backgroundColor = '#CCC';
             preview.style.display = 'flex';
+            downloadIcon.style.display = 'block';
         };
 
         guideContainer.appendChild(preview);
@@ -67,8 +77,12 @@ function connectServer() {
 
 window.onload = () => {
     const server = connectServer();
-    captureBtn.addEventListener('click', () => {
+    clickFunc = () => {
         captureBtn.style.backgroundColor = '#FF3333';
         server.sendCaptureMsg();
+    }
+
+    captureBtn.addEventListener('click', () => {
+        clickFunc();
     });
 }
