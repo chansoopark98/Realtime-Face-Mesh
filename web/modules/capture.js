@@ -12,20 +12,40 @@ const frameConfigPath = './assets/img/frame.json';
 let frameConfig = null;
 let captureButton = null;
 
+function random() {
+    const seed = Math.random();
+    if (seed > 0.75) {
+        return 'coffee';
+    }
+    else {
+        return 'normal';
+    }
+}
+
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
     const wss = new WebSocket('wss://127.0.0.1:5503');
+    let coffeeNum = 0;
 
     wss.onmessage = (msg) => {
-        const data = msg.data;
+        const data = JSON.parse(msg.data);
 
-        if (data == flag.GET_IMAGE_FLAG) {
+        if (data.flag == flag.GET_IMAGE_FLAG) {
+            coffeeNum = parseInt(data.num);
+            let eventResult = 'normal';
+
             effect.countDown().then(() => {
                 effect.playEffect().then(() => {
                     const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
-                    getFrame([ capturedImage ]).then((imgBase64) => {
+                    
+                    if (coffeeNum > 0) {
+                        eventResult = random();
+                    }
+
+                    getFrame([ capturedImage ], eventResult).then((imgBase64) => {
                         wss.send(JSON.stringify({
                             'flag' : flag.SEND_IMAGE_FLAG,
-                            'data' : imgBase64
+                            'data' : imgBase64,
+                            'num' : coffeeNum
                         }));
                     });
                 })
@@ -335,7 +355,9 @@ function createCaptureEffect(containerElement) {
     }
 }
 
-function getFrame(imgList, mode='white_normal_frame') {
+function getFrame(imgList, eventResult) {
+    let mode = `white_${eventResult}_frame`;
+
     return new Promise((resolve, reject) => {
         const imageCanvas = document.createElement('canvas');
         const imageContext = imageCanvas.getContext('2d');

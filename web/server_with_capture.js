@@ -44,6 +44,11 @@ const CAMERA_SERVER_FLAG = '$$CAM_SERVER';
 const CLIENT_FLAG = '$$CLIENT';
 const SEND_IMAGE_FLAG = '$$SENDIMG';
 
+let coffeeJson = fs.readFileSync('./coffee.json', 'utf8');
+coffeeJson = JSON.parse(coffeeJson);
+
+console.log(coffeeJson.num)
+
 const clients = new Map();
 let camServer = null;
 
@@ -66,12 +71,15 @@ wss.on('connection', (ws, req) => {
         clients.set(ws, clientId);
         break;
       case GET_IMAGE_FLAG:
-        camServer.ws.send(GET_IMAGE_FLAG);
+        camServer.ws.send(JSON.stringify({ 'flag': GET_IMAGE_FLAG, 'num':  coffeeJson.num }));
         break;
       case SEND_IMAGE_FLAG:
         [...clients.keys()].forEach((client) => {
           client.send(jsonData.data);
         });
+        coffeeJson.num = parseInt(jsonData.num);
+        const saveJson = JSON.stringify(coffeeJson);
+        fs.writeFileSync('./coffee.json', saveJson);
         break;
     }
   });
