@@ -260,7 +260,7 @@ function createCaptureEffect(containerElement) {
         const playEffect = () => {
             return new Promise((resolve) => {
                 const width = captureEffectCanvas.width;
-                const step = 50;
+                const step = 80;
                 let current = width;
     
                 radius = width;

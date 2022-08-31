@@ -81,8 +81,9 @@ class TCPServer():
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
         # Cut off by boxes scale
-        box_cut_off = 100
+        box_cut_off = 80
         condition = (boxes[:, 2] - boxes[:, 0]) > box_cut_off
+        print(boxes[:, 2] - boxes[:, 0])
         mask = np.where(condition, True, False)
         boxes = boxes[mask]
 
@@ -243,7 +244,7 @@ if __name__ == "__main__":
     parser.add_argument('--password', '-pw',
                                                 type=str,
                                                 help='SSL Password [default : None]',
-                                                default=None)
+                                                default='tsp190910')
     parser.add_argument('--use_local', '-ul',
                                                 type=bool,
                                                 help='Launch Server Local Setting (127.0.0.1) [default : False]',
@@ -251,8 +252,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    cert = os.path.join(args.ssl_path, 'cert.pem')
-    key = os.path.join(args.ssl_path, 'privkey.pem')
+    cert = os.path.join(args.ssl_path, 'ar.tsp-xr.com-crt.pem')
+    key = os.path.join(args.ssl_path, 'ar.tsp-xr.com-key.pem')
 
     USE_LOCAL = args.use_local
 

@@ -30,8 +30,8 @@ let targetLoop = 0;
 let maxObjNums = 6;
 
 // 딥러닝 연산 처리를 위한 Websocket
-const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
-// const webSocket = new WebSocket('ws://127.0.0.1:7777');
+// const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
+const webSocket = new WebSocket('wss://127.0.0.1:7777');
 // const webSocket = new WebSocket('wss://127.0.0.1:5502');
 
 // 효과 및 다양한 이펙트를 표현하기 위한 canvas

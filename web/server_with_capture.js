@@ -5,8 +5,9 @@ const WebSocket = require('ws');
 
 const fs = require('fs');
 const options = {
-    key: fs.readFileSync('../../ssl/privkey.pem', 'utf8'),
-    cert: fs.readFileSync('../../ssl/cert.pem', 'utf8'),
+    key: fs.readFileSync('../ar.tsp-xr.com-key.pem', 'utf8'),
+    cert: fs.readFileSync('../ar.tsp-xr.com-crt.pem', 'utf8'),
+    passphrase: 'tsp190910',
     requestCert: false,
     rejectUnauthorized: false
 };
@@ -50,6 +51,8 @@ wss.on('connection', (ws, req) => {
   const clientAddress = req.socket.remoteAddress;
   const clientPort = req.socket.remotePort;
   const clientId = `${clientAddress}:${clientPort}`;
+
+  console.log(clientId)
 
   ws.on('message', (msg) => {
     const jsonData = JSON.parse(msg);
