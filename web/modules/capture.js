@@ -22,7 +22,7 @@ function random() {
 
     console.log(seed);
     
-    if (seed % 4 == 0) {
+    if (seed % 3 == 0) {
         return 'coffee';
     }
     else {

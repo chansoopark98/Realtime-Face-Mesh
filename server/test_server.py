@@ -52,7 +52,7 @@ class TCPServer():
     def load_model(self):
         # Face detection tflite converted model
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                                 conf_threshold=0.6, nms_iou_threshold=0.5,
+                                                 conf_threshold=0.7, nms_iou_threshold=0.5,
                                                  nms_max_output_size=200)
         # Facial landmark detection tflite converted model
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
@@ -81,7 +81,7 @@ class TCPServer():
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
         # Cut off by boxes scale
-        box_cut_off = 100
+        box_cut_off = 5000 # min 15000
         condition = ((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])) > box_cut_off
         print((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]))
         mask = np.where(condition, True, False)
@@ -183,7 +183,8 @@ class TCPServer():
 
                 # Clip scale
                 norm_scale = vector / self.image_shape[1]
-                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.1:
+                print(norm_scale)
+                if abs(self.prev_scales[idx, 0] - norm_scale) > 0.025:
                     self.prev_scales[idx, 0] = norm_scale
                 
                 """ Convert detection results (center x, y, angles, scale) to string """
