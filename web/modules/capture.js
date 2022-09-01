@@ -9,8 +9,13 @@ import { flag } from './server.flags.js';
 const captureCanvas = document.createElement('canvas');
 const captureContext = captureCanvas.getContext('2d');
 const frameConfigPath = './assets/img/frame.json';
+
 let frameConfig = null;
 let captureButton = null;
+let container = null;
+let sendButton = null;
+let qrButton = null;
+let qrLayer = null;
 
 let wss = null;
 let coffeeNum = 0;
@@ -91,7 +96,7 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
 function sendImage() {
     wss.send(JSON.stringify({
         'flag' : flag.SEND_IMAGE_FLAG,
-        'data' : imgBase64,
+        'data' : previousImage,
         'num' : coffeeNum
     }));
 }
@@ -181,19 +186,49 @@ function createCaptureButton(videoElement,
     if (!captureButton) {
         if (buttonElement) {
             captureButton = buttonElement;
+            container = containerElement;
         } else {
+            container = containerElement;
+            const buttonContainer = document.createElement('div');
+
             captureButton = document.createElement('div');
             captureButton.id = 'capture-btn';
             captureButton.style.position = 'absolute';
             captureButton.style.backgroundColor = '#FF0000';
-            captureButton.style.width = '30px';
-            captureButton.style.height = '30px';
-            captureButton.style.borderRadius = '30px';
+            captureButton.style.width = '25px';
+            captureButton.style.height = '25px';
+            captureButton.style.borderRadius = '25px';
             captureButton.style.margin = '10px';
-            captureButton.style.top = 0;
-            captureButton.style.left = 0;
+            captureButton.style.bottom = 0;
+            captureButton.style.right = 0;
             captureButton.style.zIndex = '1000';
-            containerElement.prepend(captureButton);
+
+            sendButton = document.createElement('div');
+            sendButton.id = 'send-btn';
+            sendButton.style.position = 'absolute';
+            sendButton.style.backgroundColor = '#2222FF';
+            sendButton.style.width = '25px';
+            sendButton.style.height = '25px';
+            sendButton.style.borderRadius = '25px';
+            sendButton.style.margin = '10px';
+            sendButton.style.bottom = 0;
+            sendButton.style.right = '30px';
+            sendButton.style.zIndex = '1000';
+
+            qrButton = document.createElement('img');
+            qrButton.src = './assets/img/qr/connect.png';
+            qrButton.style.position = 'absolute';
+            qrButton.style.width = '25px';
+            qrButton.style.height = '25px';
+            qrButton.style.margin = '10px';
+            qrButton.style.bottom = 0;
+            qrButton.style.right = '60px';
+            qrButton.style.zIndex = '1000';
+
+            buttonContainer.appendChild(captureButton);
+            buttonContainer.appendChild(sendButton);
+            buttonContainer.appendChild(qrButton);
+            container.prepend(buttonContainer);
         }
     }
 
@@ -213,6 +248,67 @@ function createCaptureButton(videoElement,
         })
         //downloadImage(capturedImage.imgURL);
     });
+
+    sendButton.addEventListener('click', (event) => {
+        if (previousImage) {
+            sendImage();
+        }
+    });
+
+    qrButton.addEventListener('click', () => {
+        showQRLayer()
+    });
+}
+
+function showQRLayer() {
+    if (!qrLayer) {
+        const width = document.body.clientWidth;
+        const height = document.body.clientHeight;
+        const scale = 0.4;
+
+        qrLayer = document.createElement('div');
+        qrLayer.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+        qrLayer.style.position = 'absolute';
+        qrLayer.style.width = '100%';
+        qrLayer.style.height = '100%';
+        qrLayer.style.display = 'flex';
+        qrLayer.style.justifyContent = 'center';
+        qrLayer.style.alignItems = 'center';
+        qrLayer.style.flexDirection = 'column';
+        qrLayer.style.zIndex = '1000';
+
+        const qrContainer = document.createElement('div');
+
+        const wifi = document.createElement('img');
+        wifi.src = './assets/img/qr/wifi.png';
+        wifi.style.width = `400px`;
+        wifi.style.height = `400px`;
+
+        const connect = document.createElement('img');
+        connect.src = './assets/img/qr/connect.png';
+        connect.style.width = `400px`;
+        connect.style.height = `400px`;
+        connect.style.paddingLeft = "50px";
+
+        const help = document.createElement('div');
+        help.style.width = '850px';
+        help.style.color = '#FFF';
+        help.style.textAlign = 'center';
+        help.style.paddingTop = '50px';
+        help.style.fontSize = '20px';
+        help.style.fontFamily = 'NanumSquare';
+        help.innerHTML = '좌측 QR을 통해 WiFi 먼저 접속하신 후 오른쪽 QR로 접속해주세요';
+
+        qrContainer.appendChild(wifi);
+        qrContainer.appendChild(connect);
+        qrLayer.appendChild(qrContainer);
+        qrLayer.appendChild(help);
+
+        container.prepend(qrLayer);
+    } else {
+        qrLayer.parentElement.removeChild(qrLayer);
+        qrLayer = null;
+    }
 }
 
 function createCaptureEffect(containerElement) {
