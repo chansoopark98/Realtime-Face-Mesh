@@ -45,14 +45,14 @@ class TCPServer():
         self.prev_scales = np.zeros((self.maximum_samples, 1))
         self.sx = 480 #480
         self.sy = 120
-        self.image_shape = (1200, 1600) # H,W
+        self.image_shape = (960, 1280) # H,W
         
         self.load_model()
     
     def load_model(self):
         # Face detection tflite converted model
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                                 conf_threshold=0.8, nms_iou_threshold=0.5,
+                                                 conf_threshold=0.6, nms_iou_threshold=0.5,
                                                  nms_max_output_size=200)
         # Facial landmark detection tflite converted model
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
@@ -76,14 +76,14 @@ class TCPServer():
         imgdata = base64.b64decode(base64_data)
         frame = np.frombuffer(imgdata, np.uint8)
         frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
-
+        frame = cv2.flip(frame, 1)
         # Face detection
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
         # Cut off by boxes scale
         box_cut_off = 5000 # min 15000
         condition = ((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])) > box_cut_off
-        # print((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]))
+        print((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]))
         mask = np.where(condition, True, False)
         boxes = boxes[mask]
 
@@ -159,17 +159,19 @@ class TCPServer():
                 
                 # Restore the rotated vector using the rotation matrix.
                 test_scale = test_arr @ rotate_matrix[idx]
-
+                print('test_scale', test_scale)
                 # X,Y,Z vector reducing 
                 vector = np.add.reduce(test_scale) 
+                print('only xyz', vector)
 
                 # Compensation by the value rotated along the z-axis
                 vector -= np.absolute(angle_filtered[idx, 2] * width)
+                print('minus vector', vector)
 
                 """Restore the x,y coordinates according to the size of 
                    the frame received through the Websocket"""
-                cx = int(x_min + (width / 2)) + self.sx
-                cy = int(y_min + (height / 2)) + self.sy
+                cx = (((x_min + (width / 2)) / self.image_shape[1]) * 1600 ) + self.sx
+                cy = (((y_min + (height / 2)) / self.image_shape[0]) *  1200 ) + self.sy
                 
                 
                 """ Clipping by comparing the difference with the previous result """
@@ -197,8 +199,8 @@ class TCPServer():
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
-        # cv2.imshow('test', frame)
-        # cv2.waitKey(1)
+        cv2.imshow('test', frame)
+        cv2.waitKey(1)
         return output
         
     async def loop_logic(self, websocket: websockets, path):
@@ -253,8 +255,10 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    cert = os.path.join(args.ssl_path, 'ar.tsp-xr.com-crt.pem')
-    key = os.path.join(args.ssl_path, 'ar.tsp-xr.com-key.pem')
+    # cert = os.path.join(args.ssl_path, 'ar.tsp-xr.com-crt.pem')
+    cert = os.path.join(args.ssl_path, 'cert.pem')
+    # key = os.path.join(args.ssl_path, 'ar.tsp-xr.com-key.pem')
+    key = os.path.join(args.ssl_path, 'privkey.pem')
 
     USE_LOCAL = args.use_local
 

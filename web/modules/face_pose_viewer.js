@@ -1,6 +1,6 @@
 import * as camera_util from './camera.js';
 import { visibleHandler, updateRotationAndPosition, randomModelInitialize } from './face_pose_ar.js';
-import * as captureFunc from './capture.js'
+// import * as captureFunc from './capture.js'
 
 /*
     ----------------------<<< Global variable >>>----------------------
@@ -30,8 +30,8 @@ let targetLoop = 0;
 let maxObjNums = 6;
 
 // 딥러닝 연산 처리를 위한 Websocket
-// const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
-const webSocket = new WebSocket('wss://ar.tsp-xr.com:7777');
+const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
+// const webSocket = new WebSocket('wss://ar.tsp-xr.com:7777');
 // const webSocket = new WebSocket('ws://127.0.0.1:7777');
 // const webSocket = new WebSocket('wss://127.0.0.1:5502');
 
@@ -50,8 +50,8 @@ randomSelectButton.onclick = randomModelInitialize;
 
 // Video frame을 Websocket으로 전송하기 위한 이미지 전송용 canvas
 const sendCanvas = document.getElementById('send_canvas');
-sendCanvas.width = 1600;
-sendCanvas.height = 1200;
+sendCanvas.width = 1280; // 1600
+sendCanvas.height = 960; // 1200
 
 let sendContext = sendCanvas.getContext('2d');
                 
@@ -126,8 +126,8 @@ async function render_video(){
     
     // sendContext.drawImage(videoElement, 640, 180, 1920, 1080, 0, 0, 1920, 1080);
     // sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, dx, dy);
-    // sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1280, 960);
-    sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1600, 1200);
+    sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1280, 960);
+    // sendContext.drawImage(videoElement, sx, sy, dx, dy, 0, 0, 1600, 1200);
 
     await requestAnimationFrame(render_video);
 }
@@ -143,9 +143,9 @@ window.onload = () => {
         randomModelInitialize();
     }
 
-    const controller = document.querySelector('.controller');
-    const renderAR = document.querySelector('#render_ar');
-    // const layer = [ canvas, renderAR ];
-    const layer = [ renderAR ];
-    captureFunc.createCaptureButton(videoElement, controller, layer, sx, sy, dx, dy);
+    // const controller = document.querySelector('.controller');
+    // const renderAR = document.querySelector('#render_ar');
+    // // const layer = [ canvas, renderAR ];
+    // const layer = [ renderAR ];
+    // captureFunc.createCaptureButton(videoElement, controller, layer, sx, sy, dx, dy);
 }
