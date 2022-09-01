@@ -22,7 +22,7 @@ function random() {
 
     console.log(seed);
     
-    if (seed % 3 == 0) {
+    if (seed % 4 == 0) {
         return 'coffee';
     }
     else {
@@ -31,8 +31,8 @@ function random() {
 }
 
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
-    // const wss = new WebSocket('wss://ar.tsp-xr.com:5503');
-    const wss = new WebSocket('wss://192.168.0.43:5503');
+    wss = new WebSocket('wss://ar.tsp-xr.com:5503');
+    // const wss = new WebSocket('wss://192.168.0.43:5503');
     let coffeeNum = 0;
 
     wss.onmessage = (msg) => {
@@ -40,7 +40,7 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
 
         switch(jsonData.flag){
             case flag.GET_IMAGE_FLAG:
-                coffeeNum = parseInt(data.num);
+                coffeeNum = parseInt(jsonData.num);
                 let eventResult = 'coffee';
     
                 effect.countDown().then(() => {
@@ -308,7 +308,7 @@ function createCaptureEffect(containerElement) {
         const playEffect = () => {
             return new Promise((resolve) => {
                 const width = captureEffectCanvas.width;
-                const step = 80;
+                const step = 160;
                 let current = width;
     
                 radius = width;
@@ -348,7 +348,7 @@ function createCaptureEffect(containerElement) {
         }
 
         const countDown = (time=3) => {
-            count.innerHTML = String(time);
+            count.innerHTML = '';
             let current = time;
 
             return new Promise((resolve) => {
@@ -357,7 +357,6 @@ function createCaptureEffect(containerElement) {
                     if (current < 1) {
                         clearInterval(start);
                         count.style.display = 'none';
-                        count.innerHTML = String(time);
                         resolve();
                     }
                     count.innerHTML = String(current);

@@ -60,7 +60,7 @@ const videoElement = document.getElementById('video');
 videoElement.addEventListener('canplaythrough', render_video);
 console.log(videoElement.videoWidth, videoElement.videoHeight);
 
-/*
+
 webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시지 전송
     if (webSocket.readyState === webSocket.OPEN) {
         
@@ -118,7 +118,7 @@ webSocket.onmessage = function(message){
     }
     
 }
-*/
+
 async function render_video(){
     
     
