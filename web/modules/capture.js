@@ -32,7 +32,7 @@ function random() {
 
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
     // const wss = new WebSocket('wss://ar.tsp-xr.com:5503');
-    const wss = new WebSocket('wss://192.168.0.43:5503');
+    wss = new WebSocket('wss://127.0.0.1:5503');
     let coffeeNum = 0;
 
     wss.onmessage = (msg) => {
