@@ -27,13 +27,12 @@ function random() {
 
     console.log(seed);
     
-    // if (seed % 3 == 0) {
-    //     return 'coffee';
-    // }
-    // else {
-    //     return 'normal';
-    // }
-    return 'coffee';
+    if (seed % 2 == 0) {
+        return 'coffee';
+    }
+    else {
+        return 'normal';
+    }
 }
 
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
@@ -47,7 +46,11 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
         switch(jsonData.flag){
             case flag.GET_IMAGE_FLAG:
                 coffeeNum = parseInt(jsonData.num);
-                let eventResult = 'coffee';
+                let eventResult = 'normal';
+
+                if (coffeeNum != 0) {
+                    eventResult = random();
+                }
     
                 effect.countDown().then(() => {
                     effect.playEffect().then(() => {
