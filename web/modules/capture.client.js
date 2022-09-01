@@ -51,6 +51,7 @@ function connectServer() {
         switch(jsonData.flag) {
             case flag.SEND_IMAGE_FLAG:
                 setPreviewLayer(jsonData.data);
+                wss.close();
                 break;
         }
     };
@@ -95,6 +96,14 @@ window.onload = () => {
     clickFunc = () => {
         captureBtn.style.backgroundColor = '#FF3333';
         server.sendCaptureMsg();
+
+        const guide = document.querySelector('.guide');
+        const inner = guide.querySelector('p');
+        inner.innerHTML = '잠시만 기다려주세요...';
+
+        clickFunc = () => {
+            console.log('Please Wait...')
+        }
     }
 
     captureBtn.addEventListener('click', () => {

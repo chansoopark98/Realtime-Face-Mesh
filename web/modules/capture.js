@@ -37,7 +37,7 @@ function random() {
 }
 
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
-    const wss = new WebSocket('wss://ar.tsp-xr.com:5503');
+    wss = new WebSocket('wss://ar.tsp-xr.com:5503');
     // const wss = new WebSocket('wss://192.168.0.43:5503');
     let coffeeNum = 0;
 
@@ -233,16 +233,22 @@ function createCaptureButton(videoElement,
     }
 
     const effect = createCaptureEffect(containerElement);
-    const server = connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect);
+    connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect);
     getFrameInfo();
 
     captureButton.addEventListener('click', (event) => {
         effect.playEffect().then(() => {
+            let eventResult = 'normal';
             const capturedImage = getCaptureImage(videoElement, layerList, cx, cy, cw, ch);
-            getFrame([ capturedImage ]).then((imgBase64) => {
-                server.send(JSON.stringify({
+                        
+            eventResult = random();
+
+            getFrame([ capturedImage ], eventResult).then((imgBase64) => {
+                previousImage = imgBase64;
+                wss.send(JSON.stringify({
                     'flag' : flag.SEND_IMAGE_FLAG,
-                    'data' : imgBase64
+                    'data' : imgBase64,
+                    'num' : coffeeNum
                 }));
             });
         })
