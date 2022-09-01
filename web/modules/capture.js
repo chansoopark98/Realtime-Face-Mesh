@@ -22,12 +22,13 @@ function random() {
 
     console.log(seed);
     
-    if (seed % 3 == 0) {
-        return 'coffee';
-    }
-    else {
-        return 'normal';
-    }
+    // if (seed % 3 == 0) {
+    //     return 'coffee';
+    // }
+    // else {
+    //     return 'normal';
+    // }
+    return 'coffee';
 }
 
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {

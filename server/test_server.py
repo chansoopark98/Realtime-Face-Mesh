@@ -52,7 +52,7 @@ class TCPServer():
     def load_model(self):
         # Face detection tflite converted model
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                                 conf_threshold=0.7, nms_iou_threshold=0.5,
+                                                 conf_threshold=0.9, nms_iou_threshold=0.5,
                                                  nms_max_output_size=200)
         # Facial landmark detection tflite converted model
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
@@ -83,7 +83,7 @@ class TCPServer():
         # Cut off by boxes scale
         box_cut_off = 5000 # min 15000
         condition = ((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])) > box_cut_off
-        print((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]))
+        # print((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]))
         mask = np.where(condition, True, False)
         boxes = boxes[mask]
 
@@ -183,7 +183,7 @@ class TCPServer():
 
                 # Clip scale
                 norm_scale = vector / self.image_shape[1]
-                print(norm_scale)
+                # print(norm_scale)
                 if abs(self.prev_scales[idx, 0] - norm_scale) > 0.025:
                     self.prev_scales[idx, 0] = norm_scale
                 
