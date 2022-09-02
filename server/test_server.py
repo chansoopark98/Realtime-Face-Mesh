@@ -9,7 +9,7 @@ import base64
 import service
 import cv2
 import math
-from post_processing import rotationMatrixToEulerAngles
+from post_processing import rotationMatrixToEulerAngles, pose, sparse, dense
 
 class LowPassFilterMulti(object):
     def __init__(self, cut_off_freqency, ts, maximum_samples, shape):
@@ -52,12 +52,14 @@ class TCPServer():
     def load_model(self):
         # Face detection tflite converted model
         self.fd = service.UltraLightFaceDetecion("weights/RFB-320.tflite",
-                                                 conf_threshold=0.6, nms_iou_threshold=0.5,
+                                                 conf_threshold=0.8, nms_iou_threshold=0.5,
                                                  nms_max_output_size=200)
         # Facial landmark detection tflite converted model
         self.fa = service.DepthFacialLandmarks("weights/sparse_face.tflite")
         # Service handler
-        self.handler = getattr(service, 'pose')
+        # self.color = service.TrianglesMeshRender("/home/park/park/Realtime-Face-Mesh/server/asset/render.so",
+        #                                         "/home/park/park/Realtime-Face-Mesh/server/asset/triangles.npy")
+        # self.handler = getattr(service, 'mesh')
     
     def rcv_data(self, data: str, angle_filter: LowPassFilterMulti) -> str:
         """
@@ -81,11 +83,11 @@ class TCPServer():
         boxes, _ = self.fd.inference(frame) # boxes, scores
         
         # Cut off by boxes scale
-        box_cut_off = 5000 # min 15000
-        condition = ((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])) > box_cut_off
-        print((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1]))
-        mask = np.where(condition, True, False)
-        boxes = boxes[mask]
+        # box_cut_off = 5000 # min 15000
+        # condition = ((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])) > box_cut_off
+        
+        # mask = np.where(condition, True, False)
+        # boxes = boxes[mask]
 
         # Clip by maximum samples
         n_boxes = boxes.shape[0]
@@ -97,6 +99,10 @@ class TCPServer():
 
         # Post processing
         for results in self.fa.get_landmarks(feed, boxes):
+            pose(frame, results, (100, 50, 150))
+            sparse(frame, results, (128, 255, 30))
+            dense(frame, results, (0, 60, 200))
+            # mesh(frame, results, self.color)
             # Get 3x3 rotation matrix
             _, params = results
             R = params[:3, :3].copy()
@@ -159,14 +165,14 @@ class TCPServer():
                 
                 # Restore the rotated vector using the rotation matrix.
                 test_scale = test_arr @ rotate_matrix[idx]
-                print('test_scale', test_scale)
+                
                 # X,Y,Z vector reducing 
                 vector = np.add.reduce(test_scale) 
-                print('only xyz', vector)
+                
 
                 # Compensation by the value rotated along the z-axis
                 vector -= np.absolute(angle_filtered[idx, 2] * width)
-                print('minus vector', vector)
+                
 
                 """Restore the x,y coordinates according to the size of 
                    the frame received through the Websocket"""
@@ -199,12 +205,22 @@ class TCPServer():
 
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
-        cv2.imshow('test', frame)
+        
+        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+
+        cv2.putText(frame, 'Detected humans : ', (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+                        (200, 50, 0), 3, cv2.LINE_AA)
+        
+        cv2.putText(frame,  str(number_samples), (425, 70), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+                        (5, 50, 255), 3, cv2.LINE_AA)
+
+        cv2.imshow('window', frame)
         cv2.waitKey(1)
         return output
         
     async def loop_logic(self, websocket: websockets, path):
-        angle_filter = LowPassFilterMulti(4., 1/20, self.maximum_samples, 3)
+        angle_filter = LowPassFilterMulti(1., 1/20, self.maximum_samples, 3)
         
         while True:    
             # Wait data from client
@@ -255,10 +271,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    # cert = os.path.join(args.ssl_path, 'ar.tsp-xr.com-crt.pem')
-    cert = os.path.join(args.ssl_path, 'cert.pem')
-    # key = os.path.join(args.ssl_path, 'ar.tsp-xr.com-key.pem')
-    key = os.path.join(args.ssl_path, 'privkey.pem')
+    cert = os.path.join(args.ssl_path, 'ar.tsp-xr.com-crt.pem')
+    key = os.path.join(args.ssl_path, 'ar.tsp-xr.com-key.pem')
 
     USE_LOCAL = args.use_local
 

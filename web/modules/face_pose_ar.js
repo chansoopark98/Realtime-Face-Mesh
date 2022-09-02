@@ -19,6 +19,7 @@ let camera_height = 1440; // 렌더링할 캔버스 높이
 let baseModelPath = 'assets/objects/'; // 3d model path
 let modelLists = []; // Disk에서 불러온 3d model object
 let chooseModelList = []; // 랜덤으로 choice한 3d model object
+let modelLoadedFlag = false; // random model change flag
 
 let pos = new THREE.Vector3(); // create once and reuse
 let vec = new THREE.Vector3(); // create once and reuse
@@ -77,6 +78,8 @@ async function prepareModel(){
     }
     // 랜덤 모델을 선택한 뒤 scene에 추가합니다.
     randomModelInitialize();
+    
+    modelLoadedFlag = true;
 }
 
 
@@ -191,6 +194,15 @@ async function render_ar_video() {
     setTimeout(render_ar_video, 1)
 }
 
+async function autoRandomModelChanger(){
+    console.log('chnage model');
+    if (modelLoadedFlag == true){
+        randomModelInitialize();
+    }
+    setTimeout(autoRandomModelChanger, 10000)
+}
+
 prepareModel();
+autoRandomModelChanger();
 
 export { visibleHandler, updateRotationAndPosition, randomModelInitialize, };

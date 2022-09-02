@@ -27,12 +27,13 @@ function random() {
 
     console.log(seed);
     
-    if (seed % 2 == 0) {
-        return 'coffee';
-    }
-    else {
-        return 'normal';
-    }
+    // if (seed % 2 == 0) {
+    //     return 'coffee';
+    // }
+    // else {
+    //     return 'normal';
+    // }
+    return 'coffee';
 }
 
 function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
@@ -46,11 +47,11 @@ function connectCaptureServer(videoElement, layerList, cx, cy, cw, ch, effect) {
         switch(jsonData.flag){
             case flag.GET_IMAGE_FLAG:
                 coffeeNum = parseInt(jsonData.num);
-                let eventResult = 'normal';
+                let eventResult = 'coffee';
 
-                if (coffeeNum != 0) {
-                    eventResult = random();
-                }
+                // if (coffeeNum != 0) {
+                //     eventResult = random();
+                // }
     
                 effect.countDown().then(() => {
                     effect.playEffect().then(() => {
@@ -161,7 +162,17 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
         captureContext.drawImage(videoElement, 0, 0, width, height);
 
         layerList.forEach((layer) => {
-            captureContext.drawImage(layer, 0, 0, layer.width, layer.height);
+            const tmpCanvas = document.createElement('canvas');
+            const tmpContext = tmpCanvas.getContext('2d');
+
+            tmpCanvas.width = layer.width;
+            tmpCanvas.height = layer.height;
+
+            tmpContext.translate(width, 0); 
+            tmpContext.scale(-1, 1);
+            tmpContext.drawImage(layer, 0, 0, layer.width, layer.height);
+
+            captureContext.drawImage(tmpCanvas, 0, 0, layer.width, layer.height);
         });
     
         const imgData = captureContext.getImageData(cx, cy, cw, ch);
@@ -170,6 +181,8 @@ function getCaptureImage(videoElement, layerList, cx=0, cy=0, cw=0, ch=0) {
         captureCanvas.height = ch;
         captureContext.putImageData(imgData, 0, 0);
         const imgBase64 = captureCanvas.toDataURL('image/png', 1.0);
+
+        downloadImage(imgBase64);
     
         return {
             'data': imgData,

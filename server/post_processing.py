@@ -47,8 +47,6 @@ def draw_projection(frame, R, landmarks, color, thickness=2):
     rotate_matrix = R[:, :2]
     rotate_matrix[:, 1] *= -1
 
-    
-
     # 3D -> 2D
     center = np.mean(landmarks[:27], axis=0)
     points = projections @ rotate_matrix + center
@@ -60,8 +58,6 @@ def draw_projection(frame, R, landmarks, color, thickness=2):
         [0, 4], [1, 5], [2, 6], [3, 7],
         [4, 5], [5, 6], [6, 7], [7, 4]
     ], axis=0), False, color, thickness, cv2.LINE_AA)
-
-    return points
 
 def draw_poly(frame, landmarks, color=(128, 255, 255), thickness=1):
     cv2.polylines(frame, [
@@ -81,21 +77,17 @@ def draw_poly(frame, landmarks, color=(128, 255, 255), thickness=1):
 
 def sparse(frame, results, color):
     landmarks = np.round(results[0]).astype(np.int)
-    idx = 0
     for p in landmarks:
         cv2.circle(frame, tuple(p), 2, color, 0, cv2.LINE_AA)
-        print(idx)
-        cv2.imshow('test',frame)
-        cv2.waitKey(0)
-        idx +=1
+
         
     draw_poly(frame, landmarks, color=color)
 
 
 def dense(frame, results, color):
     landmarks = np.round(results[0]).astype(np.int)
-    # for p in landmarks[::6, :2]:
-    #     cv2.circle(frame, tuple(p), 1, color, 0, cv2.LINE_AA)
+    for p in landmarks[::6, :2]:
+        cv2.circle(frame, tuple(p), 1, color, 0, cv2.LINE_AA)
 
 
 def mesh(frame, results, color):
@@ -113,6 +105,6 @@ def pose(frame, results, color):
     euler = rotationMatrixToEulerAngles(R)
     # print(f"Pitch: {euler[0]}; Yaw: {euler[1]}; Roll: {euler[2]};")
 
-    points =draw_projection(frame, R, landmarks, color)
+    points = draw_projection(frame, R, landmarks, color)
 
     return euler
