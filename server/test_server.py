@@ -206,17 +206,17 @@ class TCPServer():
                 face_results = center_x + center_y + scale + roll + pitch + yaw
                 output += face_results
         
-        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        # cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        # cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
-        cv2.putText(frame, 'Detected humans : ', (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
-                        (200, 50, 0), 3, cv2.LINE_AA)
+        # cv2.putText(frame, 'Detected humans : ', (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+        #                 (200, 50, 0), 3, cv2.LINE_AA)
         
-        cv2.putText(frame,  str(number_samples), (425, 70), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
-                        (5, 50, 255), 3, cv2.LINE_AA)
+        # cv2.putText(frame,  str(number_samples), (425, 70), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+        #                 (5, 50, 255), 3, cv2.LINE_AA)
 
-        cv2.imshow('window', frame)
-        cv2.waitKey(1)
+        # cv2.imshow('window', frame)
+        # cv2.waitKey(1)
         return output
         
     async def loop_logic(self, websocket: websockets, path):
@@ -249,7 +249,7 @@ class TCPServer():
         asyncio.get_event_loop().run_forever()
         
 if __name__ == "__main__":
-    USE_LOCAL = False
+    USE_LOCAL = True
     
     parser = argparse.ArgumentParser(description="Face Detection Server")
     parser.add_argument('--ssl_path', '-sp',
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     parser.add_argument('--use_local', '-ul',
                                                 type=bool,
                                                 help='Launch Server Local Setting (127.0.0.1) [default : False]',
-                                                default=False)
+                                                default=True)
     
     args = parser.parse_args()
     

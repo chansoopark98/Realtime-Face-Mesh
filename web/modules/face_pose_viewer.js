@@ -1,6 +1,6 @@
 import * as camera_util from './camera.js';
 import { visibleHandler, updateRotationAndPosition, randomModelInitialize } from './face_pose_ar.js';
-import * as captureFunc from './capture.js'
+// import * as captureFunc from './capture.js'
 
 /*
     ----------------------<<< Global variable >>>----------------------
@@ -31,8 +31,8 @@ let maxObjNums = 6;
 
 // 딥러닝 연산 처리를 위한 Websocket
 // const webSocket = new WebSocket('wss://park-tdl.tspxr.ml:7777');
-const webSocket = new WebSocket('wss://ar.tsp-xr.com:7777');
-// const webSocket = new WebSocket('ws://127.0.0.1:7777');
+// const webSocket = new WebSocket('wss://ar.tsp-xr.com:7777');
+const webSocket = new WebSocket('ws://127.0.0.1:7777');
 // const webSocket = new WebSocket('wss://127.0.0.1:5502');
 
 // 효과 및 다양한 이펙트를 표현하기 위한 canvas
@@ -64,7 +64,7 @@ console.log(videoElement.videoWidth, videoElement.videoHeight);
 webSocket.interval = setInterval(() => { // ?초마다 클라이언트로 메시지 전송
     if (webSocket.readyState === webSocket.OPEN) {
         
-        let sendData = sendCanvas.toDataURL('image/jpeg', 0.6)
+        let sendData = sendCanvas.toDataURL('image/jpeg', 0.5)
         webSocket.send(sendData.split(",")[1]);
         
     }
@@ -147,5 +147,5 @@ window.onload = () => {
     const renderAR = document.querySelector('#render_ar');
     // const layer = [ canvas, renderAR ];
     const layer = [ renderAR ];
-    captureFunc.createCaptureButton(videoElement, controller, layer, sx, sy, dx, dy);
+    // captureFunc.createCaptureButton(videoElement, controller, layer, sx, sy, dx, dy);
 }
