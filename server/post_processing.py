@@ -76,7 +76,7 @@ def draw_poly(frame, landmarks, color=(128, 255, 255), thickness=1):
     
 
 def sparse(frame, results, color):
-    landmarks = np.round(results[0]).astype(np.int)
+    landmarks = np.round(results[0]).astype(np.int32)
     for p in landmarks:
         cv2.circle(frame, tuple(p), 2, color, 0, cv2.LINE_AA)
 
@@ -85,7 +85,7 @@ def sparse(frame, results, color):
 
 
 def dense(frame, results, color):
-    landmarks = np.round(results[0]).astype(np.int)
+    landmarks = np.round(results[0]).astype(np.int32)
     for p in landmarks[::6, :2]:
         cv2.circle(frame, tuple(p), 1, color, 0, cv2.LINE_AA)
 
